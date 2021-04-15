@@ -157,7 +157,7 @@ end
 acc(i+1) = sum(good) / size(tSet,1);
 tPvec = sum(tPvec)';
 tNvec = sum(tNvec)';
-fPvec = sum(fPvec)';
+fPvec = sum(fPvec')';  % transpose to sum the false positives in each predicted class (corresponds to each row, whereas ground truth is given by column)
 fNvec = sum(fNvec)';
 
 %Compute the precision per movement
