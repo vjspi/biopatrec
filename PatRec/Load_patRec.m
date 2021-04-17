@@ -45,7 +45,7 @@ function Load_patRec(patRec, newGUI, loadMovements)
         end
     end
 
-    if isstring(newGUI) || ischar(newGUI)
+    if ischar(newGUI)
         % Open Fig and load information                
         nG = eval([newGUI,'(patRec)']);
     else
