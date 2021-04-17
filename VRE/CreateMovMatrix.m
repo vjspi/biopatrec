@@ -71,7 +71,10 @@ function [movMatrix, movMatrixNorm] = CreateMovMatrix(patRec)
         end
     end
 
-    movMatrixNorm = movMatrix ./ sqrt(sum(movMatrix.^2,2));
+    [~, col] = size(movMatrix);
+    for i=1:col
+        movMatrixNorm(:,i) = nanmax((movMatrix(:,i) ./ sqrt(sum(movMatrix.^2,2))),0);
+    end
     % Make sure the "Rest" norm is 0
     if restIdx > 0
         movMatrixNorm(restIdx,:) = [];
