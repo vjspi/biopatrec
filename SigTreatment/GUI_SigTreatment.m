@@ -1,5 +1,5 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under  
+% This file is part of BioPatRec ï¿½ which is open and free software under  
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
@@ -422,16 +422,19 @@ function pb_treatFolder_Callback(hObject, eventdata, handles)
     
     % get Paths
     lpath   = uigetdir([],'Select the directory with the recSession files');
-    spath   = uigetdir(lpath, 'Select a directory to save the sigFeatures');
+    % spath   = uigetdir(lpath, 'Select a directory to save the sigFeatures');
+    spath = [lpath '\Treated']
 
     % Setting the treatment parameters
     phandles = get(handles.t_mhandles,'UserData'); % get parent GUI handles    
 
     % Getting the rawdata and treating it
-    for rn =1 : 100
-        if exist([lpath filesep num2str(rn) '.mat'], 'file')
+    Files = dir(fullfile(lpath, '*.mat'));
+    
+    for rn = 1 : size(Files)
+        if exist([lpath filesep Files(rn).name], 'file')
             % Load recSession
-            load([lpath filesep num2str(rn) '.mat']);
+            load([lpath filesep Files(rn).name]);
             set(handles.t_recSession,'UserData',recSession);
             drawnow();
             % User message
@@ -443,7 +446,7 @@ function pb_treatFolder_Callback(hObject, eventdata, handles)
             % get sigFeatures 
             sigFeatures = GetAllSigFeatures(handles, sigTreated);
             % Save the sigFeatures
-            save([spath '\' num2str(rn) 't.mat'],'sigFeatures');
+            save([spath '\prePro_' Files(rn).name],'sigFeatures');
         else
             break;
         end 
