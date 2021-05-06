@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under
+% This file is part of BioPatRec ? which is open and free software under
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and
-% Chalmers University of Technology. All authors’ contributions must be kept
+% Chalmers University of Technology. All authors? contributions must be kept
 % acknowledged below in the section "Updates % Contributors".
 %
 % Would you like to contribute to science and sum efforts to improve
-% amputees’ quality of life? Join this project! or, send your comments to:
+% amputees? quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file
@@ -355,6 +355,7 @@ while ex <= nM
             changeFolderToMyoDLL();
             pause (0.5);
             s = MyoBandSession(sF, sTall, sCh);
+            %o = MyoBandSession(sF/4, sTall, sCh);
             cd (originFolder);
         else
             s = InitSBI_NI(sF,sTall,sCh);
@@ -362,9 +363,16 @@ while ex <= nM
         s.NotifyWhenDataAvailableExceeds = tWs;                        % PEEK time
         lh = s.addlistener('DataAvailable', @RecordingSession_ShowData);
         
+        % oh = o.addlistener('DataAvailable', @test)
+%         function test(src,~)
+%             disp('test')
+%         end
+                
         % Start DAQ
         cData = zeros(sF*sTall, nCh, nM);
-        s.startBackground();                                           % Run in the backgroud
+        s.startBackground();
+        %o.startBackground();
+        % Run in the backgroud
         
         for rep = 1 : nR
             handles.rep = rep;

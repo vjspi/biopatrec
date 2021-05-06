@@ -75,11 +75,18 @@ classdef MyoBandSession < matlab.mixin.Heterogeneous & handle
             while count == 1024
                 disp(['flush count ' mat2str(count)]);
                 [packet, packetTime] = MyoClient('SampleEmg'); % flush
+                % disp(packet);
                 [orientation, orientationTime] = MyoClient('SampleOrientation');% flush
+                %disp(orientation);
                 event = MyoClient('SampleEvents'); % flush
+                % disp(event)
                 disp(['flush packet ' mat2str(size(packet))]);
                 count = size(packet,2);
                 pause(0.2);
+                count_imu = size(orientation);
+                disp(['flush packet orientation ' mat2str(size(orientation))]);
+                %disp(count);
+                %pause(0.2);
             end
             start(session.timerHandle);
             % pause for prefiltering; block!
@@ -94,20 +101,27 @@ classdef MyoBandSession < matlab.mixin.Heterogeneous & handle
             try
             % CK: 'packetTime' is probably unnecessary    
             [packet, packetTime] = MyoClient('SampleEmg');
+            disp(['Size EMG ' mat2str(size(packet))]);
+            % plot(packet)
             % CK: next 2 calls are necessary because otherwise an overflow 
             % occurs and the MyoBand stops working properly (I think)
             [orientation, orientationTime] = MyoClient('SampleOrientation');
+            disp(['Size orientation ' mat2str(size(orientation))]);
+            % disp(orientation)
+            % plot(orientation)
             event = MyoClient('SampleEvents');
             
             count = size(packet,2);
             %disp(['packet ' num2str(count)]);
             %disp(['dataAvailableBuffer ' mat2str(size(session.dataAvailableBuffer))]);
+            
             if count > 0 && session.IsDone == false
                 
                 % transpose packet for filtering and event
                packet = packet';
-                
-                % filter
+                             
+               
+               % filter
                 % packet might be larger than butter buffer, therefore
                 % partition is necessary
 %                 filteredPacket = zeros(size(packet));
@@ -141,32 +155,46 @@ classdef MyoBandSession < matlab.mixin.Heterogeneous & handle
                 
                 % prepare final data buffer
                 % data = zeros(length(session.channelList), count);
-                data = zeros(count, length(session.channelList));%original
+                data = zeros(count, length(session.channelList));   %original - VS: number of samples as incoming (packet)
                 % channel mapping
+                % disp(['channel index '  num2str(session.channelList)]);
+                
                 for channelIx=1:length(session.channelList)
                     channelId = session.channelList(channelIx);
                     data(:,channelIx) = packet(:,channelId);
                 end
                 
-                %disp(['data ' mat2str(size(data))]);
+                data_imu = orientation';                
+                
+                %plot(data)
+                % disp(['data ' mat2str(size(data))]);
                 %disp(session.notifyOnlyOncePerIncoming);
+                
+                % VS: Avoid double use of the data and therefore cut to the desired window?
                 if session.notifyOnlyOncePerIncoming
                     if size(data,1) > floor(session.NotifyWhenDataAvailableExceeds)
-                        %disp(size(data));
+                        disp(['Before cut' mat2str(size(data))]);
                         data = data(end-floor(session.NotifyWhenDataAvailableExceeds)+1:end,:);
-                        %disp(size(data));
+                        disp(['After cut' mat2str(size(data))]);
                         count = size(data,1);
+                        disp(['Count after DatAvailableExceeds' mat2str(size(data))]);
+                        
+                        % Cut IMU data as well
+                        imu_samples = floor(session.NotifyWhenDataAvailableExceeds/4);
+                        data_imu=data_imu(end-imu_samples+1:end,:);
                     end
                 end
                 
                 % put data into DataAvailable buffer and fire events until
-                % whole packet is consumed
+                % whole packet is consumed 
+                % VS: loop until 10 samples are recorded
                 while count > 0 && session.IsDone == false
-                    
                 
-                    
                     % put packet into DataAvailable buffer
+                    % VS: identify number of samples to append -> either the number of samples still required for total recording(durSamples) 
+                    % or (the number of available samples (count) or required samples to fill buffer(difference))
                     toAppend = min(session.durationSamples,min(count, length(session.dataAvailableBuffer) - session.dataAvailableCounter));
+                    disp(['Appending ' mat2str(toAppend) ' samples']);
                     session.dataAvailableBuffer(session.dataAvailableCounter+1:session.dataAvailableCounter+toAppend,:) = ...
                         data(1:toAppend,:);
                     data = data(toAppend+1:end,:);
@@ -183,6 +211,7 @@ classdef MyoBandSession < matlab.mixin.Heterogeneous & handle
                         after = now;
                         timestamps = fliplr(1:session.dataAvailableCounter);
                         timestamps = after - (timestamps*session.sampleStep);
+                        disp(['Computed ' mat2str(length(timestamps)) ' timestamps']);
                         % prepare event
                         event = struct('Data',session.dataAvailableBuffer(1:session.dataAvailableCounter,:) ...
                             ,'TimeStamps',timestamps','TriggerTime',timestamps(1));
