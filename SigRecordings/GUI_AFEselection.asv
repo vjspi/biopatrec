@@ -461,7 +461,7 @@ contents = cellstr(get(handles.pm_name,'String'));
 deviceName = contents{get(handles.pm_name,'Value')};
 %CK: These are the default values for the MyoBand. Changing these might
 %lead to unwanted behaviour.
-if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test')
+if strcmp(deviceName, 'Thalmic MyoBand') | 
     set(handles.pm_sampleRate, 'Value', 9); %CK: The sample rate should be 200 Hz
     set(handles.ComPortType, 'Value', 1); %CK: I chose the NI ComPort because later in BPR it was easier to implement the MyoBand as an NI device, eventhough it isn't!
     set(handles.et_chs, 'String', '8');

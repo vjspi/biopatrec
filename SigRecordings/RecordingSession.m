@@ -349,13 +349,13 @@ while ex <= nM
         % Init SBI
         sCh = 1:nCh;
         
-        if strcmp(deviceName, 'Thalmic MyoBand')
+        if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test')
             %CK: init MyoBand
             originFolder = pwd;
             changeFolderToMyoDLL();
             pause (0.5);
-            s = MyoBandSession(sF, sTall, sCh);
-            %o = MyoBandSession(sF/4, sTall, sCh);
+            %s = MyoBandSession(sF, sTall, sCh);
+             s = MyoBandSession_Mex(sF, sTall, sCh);
             cd (originFolder);
         else
             s = InitSBI_NI(sF,sTall,sCh);
@@ -513,13 +513,14 @@ while ex <= nM
         
         %CK: Since variable lh is not used in the MyoBandSession, we cannot
         %delete it this way. But for any other device lh will be deleted.
-        if ~strcmp(deviceName, 'Thalmic MyoBand')
+        if ~strcmp(deviceName, 'Thalmic MyoBand') && ~strcmp(deviceName, 'Myo_test')
             delete(lh);
         end
         %CK: Stop sampling from MyoBand
-        if strcmp(deviceName, 'Thalmic MyoBand')
+        if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test')
              MyoClient('StopSampling');
         end
+        
     end
     
     if error == 1
