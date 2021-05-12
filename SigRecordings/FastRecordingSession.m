@@ -168,7 +168,10 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
         s.startBackground();                                           % Run in the backgroud
 
         startTimerTic = tic;
-        pause(sT - toc(startTimerTic));
+        disp(['Pausing: ', num2str(sT - toc(startTimerTic))]);
+        %pause(sT - toc(startTimerTic));
+        pause(sT);
+
 
     % Repetitions other devices     
     else
@@ -219,12 +222,14 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
 %             s.stop(); 
             MyoClient('StopSampling');
         elseif strcmp(deviceName, 'Myo_test') 
+              data_temp = s.myoData.emg_log;
               delete(s.myMyoMex);       %deleting the MatMex object (opened in the beginning)
         end
     end
 
     % Save Data
     recSessionData = allData;
+    recSessionData = data_temp(1:200,:);    %%%%%!!!!!!!!!!! How to cut properly??
     allData = [];                                                      % clean global data for next movement
     
     

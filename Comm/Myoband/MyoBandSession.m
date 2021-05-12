@@ -98,6 +98,7 @@ classdef MyoBandSession < matlab.mixin.Heterogeneous & handle
         % Acquires samples from MyoClient, buffers, filters and fires
         % DataAvailable listener event.
         function sample(session)
+            disp('New sample execution')
             try
             % CK: 'packetTime' is probably unnecessary    
             [packet, packetTime] = MyoClient('SampleEmg');
@@ -172,12 +173,12 @@ classdef MyoBandSession < matlab.mixin.Heterogeneous & handle
                 
                 % VS: Avoid double use of the data and therefore cut to the desired window?
                 if session.notifyOnlyOncePerIncoming
-                    if size(data,1) > floor(session.NotifyWhenDataAvailableExceeds)
+                    if size(data,1) > floor(session.NotifyWhenDataAvailableExceeds) %NotifyWhen... is the number of samples of selected timeWindow
                         disp(['Before cut' mat2str(size(data))]);
                         data = data(end-floor(session.NotifyWhenDataAvailableExceeds)+1:end,:);
                         disp(['After cut' mat2str(size(data))]);
                         count = size(data,1);
-                        disp(['Count after DatAvailableExceeds' mat2str(size(data))]);
+                        disp(['Count after DataAvailableExceeds' mat2str(size(data))]);
                         
                         % Cut IMU data as well
                         imu_samples = floor(session.NotifyWhenDataAvailableExceeds/4);
@@ -198,7 +199,9 @@ classdef MyoBandSession < matlab.mixin.Heterogeneous & handle
                     session.dataAvailableBuffer(session.dataAvailableCounter+1:session.dataAvailableCounter+toAppend,:) = ...
                         data(1:toAppend,:);
                     data = data(toAppend+1:end,:);
+                    disp(data);
                     count = count - toAppend;
+                    disp(['Count: ', num2str(count)]);
                     session.dataAvailableCounter = session.dataAvailableCounter + toAppend;
                     
                     session.durationSamples = session.durationSamples - toAppend;
@@ -216,9 +219,9 @@ classdef MyoBandSession < matlab.mixin.Heterogeneous & handle
                         event = struct('Data',session.dataAvailableBuffer(1:session.dataAvailableCounter,:) ...
                             ,'TimeStamps',timestamps','TriggerTime',timestamps(1));
                         % call listener callback
-                        if ~session.notifyOnlyOncePerIncoming || count<size(session.dataAvailableBuffer,1)
+                        if ~session.notifyOnlyOncePerIncoming || count<size(session.dataAvailableBuffer,1) %???
                             try
-                                session.listenerCallback(session,event);
+                                session.listenerCallback(session,event);    %Display data (as mentioned in callback function)
                             catch e
                                 disp('MyoBandRecordingSession failed, trying to move on');
                                 getReport(e)
