@@ -23,11 +23,13 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
         filterBuffer % butter buffer
         prefilterSamples % number of samples for prefiltering
         notifyOnlyOncePerIncoming = true
+        myMyoMex
+        myoData
     end
 
     
     methods
-        function session = MyoBandSession(sampleRate, duration, channelList)
+        function session = MyoBandSession_Mex(sampleRate, duration, channelList)
             session.sampleRate = sampleRate;
             session.sampleStep = (datenum('00:00:02')-datenum('00:00:01'))/session.sampleRate;
             session.duration = duration;
@@ -36,8 +38,12 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
             session.FILTER_BUFFER_SIZE = session.sampleRate; % 1 second
             session.BUTTER_PADDING_SIZE = 512;
             session.filterBuffer = zeros(session.FILTER_BUFFER_SIZE+session.BUTTER_PADDING_SIZE, 22);
-            % m = MyoMex();
+            % MyoClient('GetMyo');
+            if exist('mm','var')  && isa(mm,'MyoMex'), delete(mm);  end
+            if exist('tmr','var') && isa(tmr,'timer'), delete(tmr); end
             
+            mm = MyoMex(1);
+            session.myMyoMex = mm;
         end
         
         function lh = addListener(session, eventName, listenerCallback)
@@ -69,16 +75,28 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
             
             session.dataAvailableCounter = 0;
             %MyoClient('StartSampling', session.sampleRate);
-            MyoClient('StartSampling');
+            
+
+            %MyoClient('StartSampling');
+            session.myoData = session.myMyoMex.myoData;
+            
+            %Check
+            if session.myoData.isStreaming
+                disp('Myo is streaming')
+            end
+            
+                  
             count = 1024;
             pause on;
             while count == 1024
                 disp(['flush count ' mat2str(count)]);
-                [packet, packetTime] = MyoClient('SampleEmg'); % flush
+                %[packet, packetTime] = s MyoClient('SampleEmg'); % flush
+                packet = session.myoData.emg_log; 
                 % disp(packet);
-                [orientation, orientationTime] = MyoClient('SampleOrientation');% flush
+                %[orientation, orientationTime] = MyoClient('SampleOrientation');% flush
+                orientation = session.myoData.quat_log; 
                 %disp(orientation);
-                event = MyoClient('SampleEvents'); % flush
+                %event = MyoClient('SampleEvents'); % flush
                 % disp(event)
                 disp(['flush packet ' mat2str(size(packet))]);
                 count = size(packet,2);
@@ -88,7 +106,7 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
                 %disp(count);
                 %pause(0.2);
             end
-            start(session.timerHandle);
+            start(session.timerHandle); % Call sample function
             % pause for prefiltering; block!
             %pause on;
             %pause(session.BUTTER_PADDING_SIZE/session.sampleRate);
@@ -100,25 +118,28 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
         function sample(session)
             try
             % CK: 'packetTime' is probably unnecessary    
-            [packet, packetTime] = MyoClient('SampleEmg');
+            %[packet, packetTime] = s MyoClient('SampleEmg'); % flush
+            packet = session.myoData.emg_log; 
+            packet = packet(end-9:end, :);
             disp(['Size EMG ' mat2str(size(packet))]);
             % plot(packet)
             % CK: next 2 calls are necessary because otherwise an overflow 
             % occurs and the MyoBand stops working properly (I think)
-            [orientation, orientationTime] = MyoClient('SampleOrientation');
+            %[orientation, orientationTime] = MyoClient('SampleOrientation');% flush
+            orientation = session.myoData.quat;
             disp(['Size orientation ' mat2str(size(orientation))]);
             % disp(orientation)
             % plot(orientation)
-            event = MyoClient('SampleEvents');
+            % event = MyoClient('SampleEvents');
             
-            count = size(packet,2);
+            count = size(packet,1);           % Index changed compared to MyoClient (because channels already correspond to columns)
             %disp(['packet ' num2str(count)]);
             %disp(['dataAvailableBuffer ' mat2str(size(session.dataAvailableBuffer))]);
             
             if count > 0 && session.IsDone == false
                 
                 % transpose packet for filtering and event
-               packet = packet';
+               %packet = packet';
                              
                
                % filter
@@ -241,7 +262,8 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
             end
             catch e
                 getReport(e)
-            end
+            end    
+          
         end
         
         function wait(session)

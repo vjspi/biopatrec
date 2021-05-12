@@ -142,12 +142,19 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
 
         % Init SBI
         sCh = 1:nCh;
-        if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test') 
+        if strcmp(deviceName, 'Thalmic MyoBand') 
             %CK: init MyoBand
             originFolder = pwd;
             changeFolderToMyoDLL();
             pause (0.5);
             s = MyoBandSession(sF, sT, sCh);
+            cd (originFolder);
+        elseif strcmp(deviceName, 'Myo_test')
+            %CK: init MyoBand
+            originFolder = pwd;
+            changeFolderToMyoMex();
+            pause (0.5);
+            s = MyoBandSession_Mex(sF, sT, sCh);
             cd (originFolder);
         else
             s = InitSBI_NI(sF,sT,sCh);
@@ -157,6 +164,7 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
 
         % Start DAQ
         cData = zeros(sF*sT, nCh);
+        imuData = zeros(sF*sT, 7);  % 7 values for 4 quaternions and 3 accelerometer
         s.startBackground();                                           % Run in the backgroud
 
         startTimerTic = tic;
@@ -207,9 +215,11 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
             delete(lh);
         end
         %CK: Stop sampling from MyoBand
-        if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test') 
+        if strcmp(deviceName, 'Thalmic MyoBand') 
 %             s.stop(); 
             MyoClient('StopSampling');
+        elseif strcmp(deviceName, 'Myo_test') 
+              delete(s.myMyoMex);       %deleting the MatMex object (opened in the beginning)
         end
     end
 
