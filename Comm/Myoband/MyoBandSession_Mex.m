@@ -7,7 +7,7 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
         duration % recording session duration
         durationSamples % duration in samples
         channelList % list of channels to return
-        NotifyWhenDataAvailableExceeds % time in seconds, DataAvailable Event period
+        NotifyWhenDataAvailableExceeds % time in seconds, DataAvailable Event period    % Desired window size in samples
         % at this moment only one listener
         listenerEvent % event, listener expects
         listenerCallback % listener's callback function
@@ -34,9 +34,9 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
             session.sampleStep = (datenum('00:00:02')-datenum('00:00:01'))/session.sampleRate;
             session.duration = duration;
             session.channelList = channelList;
-            [session.filterB,session.filterA]=butter(3,[.01,.99]);
-            session.FILTER_BUFFER_SIZE = session.sampleRate; % 1 second
-            session.BUTTER_PADDING_SIZE = 512;
+%             [session.filterB,session.filterA]=butter(3,[.01,.99]);
+%             session.FILTER_BUFFER_SIZE = session.sampleRate; % 1 second
+%             session.BUTTER_PADDING_SIZE = 512;
             session.filterBuffer = zeros(session.FILTER_BUFFER_SIZE+session.BUTTER_PADDING_SIZE, 22);
             % MyoClient('GetMyo');
             if exist('mm','var')  && isa(mm,'MyoMex'), delete(mm);  end
@@ -108,7 +108,7 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
             end
             start(session.timerHandle); % Call sample function
             % pause for prefiltering; block!
-            %pause on;
+            pause on;
             %pause(session.BUTTER_PADDING_SIZE/session.sampleRate);
         end
         
@@ -120,7 +120,7 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
             % CK: 'packetTime' is probably unnecessary    
             %[packet, packetTime] = s MyoClient('SampleEmg'); % flush
             packet = session.myoData.emg_log; 
-            packet = packet(end-9:end, :);
+            %packet = packet(end-9:end, :);
             disp(['Size EMG ' mat2str(size(packet))]);
             % plot(packet)
             % CK: next 2 calls are necessary because otherwise an overflow 
@@ -142,39 +142,6 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
                %packet = packet';
                              
                
-               % filter
-                % packet might be larger than butter buffer, therefore
-                % partition is necessary
-%                 filteredPacket = zeros(size(packet));
-%                 filteredPacketCounter = 0;
-%                 while filteredPacketCounter < count
-%                     toFilter = min(count-filteredPacketCounter, ...
-%                         session.FILTER_BUFFER_SIZE);
-%                     session.filterBuffer = vertcat(session.filterBuffer(toFilter+1:end,:), ...
-%                         packet(filteredPacketCounter+1:filteredPacketCounter+toFilter,:));
-%                     tempBuffer = filter(session.filterB, session.filterA, session.filterBuffer(:,:));
-%                     filteredPacket(filteredPacketCounter+1:filteredPacketCounter+toFilter,:) = ...
-%                         tempBuffer(end-toFilter+1:end,:);
-%                     filteredPacketCounter = filteredPacketCounter + toFilter;
-%                 end
-%                 
-%                 packet = filteredPacket;
-%                 TODO: maybe filter after channel mapping for more
-%                 performance
-%                 
-%                 drop packets for prefiltering
-%                 if session.prefilterSamples > 0
-%                     toDrop = min(session.prefilterSamples, count);
-%                     session.prefilterSamples = session.prefilterSamples - toDrop;
-%                     count = count - toDrop;
-%                     if count > 0
-%                         packet = packet(toDrop+1:end,:);
-%                     else
-%                         return;
-%                     end
-%                 end
-                
-                % prepare final data buffer
                 % data = zeros(length(session.channelList), count);
                 data = zeros(count, length(session.channelList));   %original - VS: number of samples as incoming (packet)
                 % channel mapping
@@ -202,7 +169,7 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
                         
                         % Cut IMU data as well
                         imu_samples = floor(session.NotifyWhenDataAvailableExceeds/4);
-                        data_imu=data_imu(end-imu_samples+1:end,:);
+                        %data_imu=data_imu(end-imu_samples+1:end,:);
                     end
                 end
                 
@@ -254,6 +221,8 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
                         session.IsDone = true;
                         session.IsLogging = false;
                         stop(session.timerHandle);
+                        session.myoData.stopStreaming(); % Turn off recording
+                        a = session.myoData.emg_log;
                         %MyoClient('StopSampling');
                     end
                     
