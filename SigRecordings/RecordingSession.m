@@ -517,8 +517,15 @@ while ex <= nM
             delete(lh);
         end
         %CK: Stop sampling from MyoBand
-        if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test')
+        if strcmp(deviceName, 'Thalmic MyoBand') 
              MyoClient('StopSampling');
+        elseif strcmp(deviceName, 'Myo_test') 
+            delete(s.myMyoMex);       %deleting the MatMex object (opened in the beginning)
+            s.stop();
+            
+            % Save Data
+            allData = s.emgData;
+            s.emgData = [];        
         end
         
     end

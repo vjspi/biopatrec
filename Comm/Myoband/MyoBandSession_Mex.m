@@ -26,6 +26,12 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
         myMyoMex
         myoData
         allData
+        
+        % Recorded data 
+        emgData
+        emgTime
+        imuData
+        imuTime
     end
 
     
@@ -81,23 +87,8 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
             func = @(~,~)session.sample(); 
             session.timerHandle = timer('TimerFcn',func,'StartDelay',session.timerPeriod,'Period',session.timerPeriod,'ExecutionMode','fixedRate');
             
-            % start(session.timerHandle)
+            start(session.timerHandle)
             
-            while session.IsDone == false
-                
-                % Add code for live display of recording
-                % disp('Loop')
-                
-                 if size(session.myoData.timeEMG_log,1) >= session.durationSamples
-                    session.IsDone = true;
-                    stop(session.timerHandle);
-                    
-                    % saving the data  
-                    % Data acquisition as long as sampling time
-                    data = session.myoData.emg_log;
-                    session.allData = data(1:session.durationSamples,:);
-                end
-            end
                        
         end
         
@@ -106,42 +97,49 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
         % DataAvailable listener event.
         function sample(session)
             try
-                timeIMU = session.myoData.timeIMU_log;
-                timeEMG = session.myoData.timeEMG_log;
-                quat = session.myoData.quat_log;
-                emg = session.myoData.emg_log;
                 
-                % Compute logical indexes for the desired data
-                timeMax = max([timeIMU(end),timeEMG(end)]);
-                idxIMU = timeIMU > timeMax-session.NotifyWhenDataAvailableExceeds;
-                idxEMG = timeEMG > timeMax-session.NotifyWhenDataAvailableExceeds;
-%                 
-                % Copy desired data
-%                 tq = timeIMU(idxIMU);
-%                 q = quat(idxIMU,:);
-                te = timeEMG(idxEMG);
-                emg = emg(idxEMG,:);
-
-                % Choose relevant data (last samples based on selected
-                % window size)
-%                 te = timeEMG(end-session.NotifyWhenDataAvailableExceeds+1:end,:);
-%                 em = emg(end-session.NotifyWhenDataAvailableExceeds+1:end,:);
-                
-                
-                event = struct('Data',emg,'TimeStamps',te,'TriggerTime',te(1));
-                session.listenerCallback(session,event);    %Display data (as mentioned in callback function)
-                
-                               
-                if size(session.myoData.timeEMG_log) >= session.durationSamples
+                if size(session.myoData.timeEMG_log,1) < session.durationSamples && session.IsDone == false
+                    %add plotting code
+%                     timeIMU = session.myoData.timeIMU_log;
+%                     timeEMG = session.myoData.timeEMG_log;
+%                     quat = session.myoData.quat_log;
+%                     emg = session.myoData.emg_log;
+% 
+%                     % Compute logical indexes for the desired data
+%                     timeMax = max([timeIMU(end),timeEMG(end)]);
+%                     idxIMU = timeIMU > timeMax-session.NotifyWhenDataAvailableExceeds;
+%                     idxEMG = timeEMG > timeMax-session.NotifyWhenDataAvailableExceeds;
+%     %                 
+%                     % Copy desired data
+%                     tq = timeIMU(idxIMU);
+%                     q = quat(idxIMU,:);
+%                     te = timeEMG(idxEMG);
+%                     emg = emg(idxEMG,:);
+                    
+%                     event = struct('Data',emg,'TimeStamps',te,'TriggerTime',te(1));
+%                     session.listenerCallback(session,event);    %Display data (as mentioned in callback function)
+                    
+                else
                     session.IsDone = true;
                     stop(session.timerHandle);
                     
                     % saving the data  
                     % Data acquisition as long as sampling time
                     data = session.myoData.emg_log;
-                    data_cut = data(1:session.durationSamples,:);
+                    disp(['Need to cut off', num2str(size(data,1)-session.durationSamples)]);
+                    session.emgData = data(1:session.durationSamples,:);
+                    session.emgTime = session.myoData.timeEMG_log(1:session.durationSamples,:);
+                    session.imuData = session.myoData.quat_log;
+                    session.imuTime = session.myoData.timeIMU_log;
+                    
                 end
-                                 
+
+
+                % Choose relevant data (last samples based on selected
+                % window size)
+%                 te = timeEMG(end-session.NotifyWhenDataAvailableExceeds+1:end,:);
+%                 em = emg(end-session.NotifyWhenDataAvailableExceeds+1:end,:);
+                               
 
             catch e
                 getReport(e)
