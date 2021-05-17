@@ -222,17 +222,17 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
 %             s.stop(); 
             MyoClient('StopSampling');
         elseif strcmp(deviceName, 'Myo_test') 
-              data_temp = s.myoData.emg_log;
+              allData = s.emgData;
+              s.emgData = [];  
+                            
               delete(s.myMyoMex);       %deleting the MatMex object (opened in the beginning)
               s.stop();
+     
         end
     end
 
     % Save Data
-    recSessionData = s.allData;
-    %recSessionData = data_temp(1:200,:);    %%%%%!!!!!!!!!!! How to cut properly??
-    s.allData = [];                                                      % clean global data for next movement
-    
+    recSessionData = allData;
     
     %% Session finish..
     set(handles.t_msg,'String','Session Terminated');                  % Show message about acquisition completed     
