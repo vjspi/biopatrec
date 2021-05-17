@@ -246,6 +246,7 @@ drawnow update
 
 % Allocation of resource to improve speed, total data
 recSessionData = zeros(sF*sTall, nCh, nM);
+%recSessionIMU = zeros(sF/4*sTall, 4, nM); %amount of samples - not exactly?
 
 
 %% Starting Session..
@@ -525,6 +526,7 @@ while ex <= nM
             
             % Save Data
             allData = s.emgData;
+            imuData = s.imuData;
             s.emgData = [];        
         end
         
@@ -551,7 +553,7 @@ while ex <= nM
             end
         else
             % Save and go ahead with the next movement..
-            recSessionData(:,:,ex) = allData(:,:);
+            recSessionData(:,:,ex) = allData(:,:);      % Save each motion into with new index (in 3rd dimesion)
             % Increase loop index
             ex = ex + 1;
         end
@@ -610,6 +612,10 @@ if saveRec                                                             % Saved i
     else
         disp(['User selected ', fullfile(pathname, filename)])
         recSession.tdata = recSessionData;
+        if strcmp(deviceName, 'Myo_test')
+            recSession.imudata = imuData;
+        end
+        
         save([pathname,filename],'recSession');
         disp(recSession);
     end
