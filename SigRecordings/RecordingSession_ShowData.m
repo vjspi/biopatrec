@@ -59,6 +59,7 @@ function RecordingSession_ShowData(src, event)
     rT              = handles.rT;
     sT              = handles.sT;
     ComPortType     = handles.ComPortType;
+    deviceName      = handles.deviceName;
     rampStatus      = handles.rampStatus;
     if rampStatus 
         rampMin     = handles.RampMin;
@@ -76,19 +77,31 @@ function RecordingSession_ShowData(src, event)
         % value, see the code below for more details
         plotGain = 10000000;
     end
-    tempData = event.Data;
-    stempData = size(tempData);
-    allData = [allData; tempData];
-    %a = s.myoData.emg_log;
-    timeStamps = [timeStamps; event.TimeStamps];
-    %timeStamps = s.myoData.timeEMG_log(end-stempData+1:end,:);
+    
+    if ~strcmp(deviceName, 'Myo_test')
+            tempData = event.Data;
+            allData = [allData; tempData];
+            %a = s.myoData.emg_log;
+            timeStamps = [timeStamps; event.TimeStamps];
+    else
+        tempData = event.Data;
+        timeStamps = event.TimeStamps;
+    end
+    
+        
+
    
     
     %% Status bar update
     if handles.fast 
         if strcmp(ComPortType,'NI')
             % NI DAQ card
-            x = 1-(timeStamps(end)/sT);
+            if ~strcmp(deviceName, 'Myo_test')
+                x = 1-(timeStamps(end)/sT);
+            else
+                x = 1-(timeStamps(end)/sT);
+            end
+            
         else
             x = 1-(samplesCounter/(sT*sF));
         end  

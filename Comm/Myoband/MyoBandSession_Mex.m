@@ -100,24 +100,28 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
                 
                 if size(session.myoData.timeEMG_log,1) < session.durationSamples && session.IsDone == false
                     %add plotting code
-%                     timeIMU = session.myoData.timeIMU_log;
-%                     timeEMG = session.myoData.timeEMG_log;
-%                     quat = session.myoData.quat_log;
-%                     emg = session.myoData.emg_log;
+                    timeIMU = session.myoData.timeIMU_log;
+                    timeEMG = session.myoData.timeEMG_log;
+                    quat = session.myoData.quat_log;
+                    emg = session.myoData.emg_log;
 % 
 %                     % Compute logical indexes for the desired data
-%                     timeMax = max([timeIMU(end),timeEMG(end)]);
-%                     idxIMU = timeIMU > timeMax-session.NotifyWhenDataAvailableExceeds;
-%                     idxEMG = timeEMG > timeMax-session.NotifyWhenDataAvailableExceeds;
-%     %                 
-%                     % Copy desired data
-%                     tq = timeIMU(idxIMU);
-%                     q = quat(idxIMU,:);
-%                     te = timeEMG(idxEMG);
-%                     emg = emg(idxEMG,:);
-                    
-%                     event = struct('Data',emg,'TimeStamps',te,'TriggerTime',te(1));
-%                     session.listenerCallback(session,event);    %Display data (as mentioned in callback function)
+%                     %timeMax = max([timeIMU(end),timeEMG(end)]);
+                    if size(timeEMG)>0
+                        timeMax = timeEMG(end);
+                        disp('No')
+                        idxIMU = timeIMU > timeMax-session.NotifyWhenDataAvailableExceeds;
+%                       idxEMG = timeEMG > timeMax-session.NotifyWhenDataAvailableExceeds;
+             
+                        % Copy desired data
+                        tq = timeIMU(idxIMU);
+                        q = quat(idxIMU,:);
+                        te = timeEMG(end-session.NotifyWhenDataAvailableExceeds+1:end);
+                        emg = emg(end-session.NotifyWhenDataAvailableExceeds+1:end,:);
+    %                     
+                        event = struct('Data',emg,'TimeStamps',te,'TriggerTime',te(1));
+                        session.listenerCallback(session,event);    %Display data (as mentioned in callback function)
+                    end
                     
                 else
                     session.IsDone = true;
@@ -126,7 +130,7 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
                     % saving the data  
                     % Data acquisition as long as sampling time
                     data = session.myoData.emg_log;
-                    disp(['Need to cut off', num2str(size(data,1)-session.durationSamples)]);
+                    disp(['Need to cut off: ', num2str(size(data,1)-session.durationSamples)]);
                     session.emgData = data(1:session.durationSamples,:);
                     session.emgTime = session.myoData.timeEMG_log(1:session.durationSamples,:);
                     session.imuData = session.myoData.quat_log;
