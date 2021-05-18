@@ -246,7 +246,7 @@ drawnow update
 
 % Allocation of resource to improve speed, total data
 recSessionData = zeros(sF*sTall, nCh, nM);
-%recSessionIMU = zeros(sF/4*sTall, 4, nM); %amount of samples - not exactly?
+recSessionIMU = zeros(sF*sTall, 4, nM); %amount of samples - not exactly?
 
 
 %% Starting Session..
@@ -350,14 +350,20 @@ while ex <= nM
         % Init SBI
         sCh = 1:nCh;
         
-        if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test')
+        if strcmp(deviceName, 'Thalmic MyoBand') 
             %CK: init MyoBand
             originFolder = pwd;
             changeFolderToMyoDLL();
             pause (0.5);
-            %s = MyoBandSession(sF, sTall, sCh);
-             s = MyoBandSession_Mex(sF, sTall, sCh);
+            s = MyoBandSession(sF, sTall, sCh);
             cd (originFolder);
+        elseif strcmp(deviceName, 'Myo_test')
+            %VS: create MyoBand connection using MyoMex
+            originFolder = pwd;
+            changeFolderToMyoDLL();
+            pause (0.5);
+             s = MyoBandSession_Mex(sF, sTall, sCh);
+             cd (originFolder);
         else
             s = InitSBI_NI(sF,sTall,sCh);
         end
@@ -527,7 +533,12 @@ while ex <= nM
             % Save Data
             allData = s.emgData;
             imuData = s.imuData;
-            s.emgData = [];        
+            imuTime = s.imuTime;
+            emgTime = s.emgTime;
+            s.emgData = [];  
+            s.imuData = []; 
+            s.emgTime = [];  
+            s.imuTime = []; 
         end
         
     end
@@ -547,7 +558,7 @@ while ex <= nM
             answer = inputdlg(prompt,dlg_title,num_lines,def);
             if strcmp(answer, 'n')
                 % Save and go ahead with the next movement..
-                recSessionData(:,:,ex) = allData(:,:);
+                recSessionData(:,:,ex) = allData(:,:);           
                 % Increase loop index
                 ex = ex + 1;
             end

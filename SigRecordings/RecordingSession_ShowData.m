@@ -81,7 +81,6 @@ function RecordingSession_ShowData(src, event)
     if ~strcmp(deviceName, 'Myo_test')
             tempData = event.Data;
             allData = [allData; tempData];
-            %a = s.myoData.emg_log;
             timeStamps = [timeStamps; event.TimeStamps];
     else
         tempData = event.Data;
@@ -96,12 +95,7 @@ function RecordingSession_ShowData(src, event)
     if handles.fast 
         if strcmp(ComPortType,'NI')
             % NI DAQ card
-            if ~strcmp(deviceName, 'Myo_test')
-                x = 1-(timeStamps(end)/sT);
-            else
-                x = 1-(timeStamps(end)/sT);
-            end
-            
+            x = 1-(timeStamps(end)/sT);          
         else
             x = 1-(samplesCounter/(sT*sF));
         end  

@@ -100,22 +100,22 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
                 
                 if size(session.myoData.timeEMG_log,1) < session.durationSamples && session.IsDone == false
                     %add plotting code
-                    timeIMU = session.myoData.timeIMU_log;
+%                     timeIMU = session.myoData.timeIMU_log;
                     timeEMG = session.myoData.timeEMG_log;
-                    quat = session.myoData.quat_log;
+%                     quat = session.myoData.quat_log;
                     emg = session.myoData.emg_log;
 % 
 %                     % Compute logical indexes for the desired data
 %                     %timeMax = max([timeIMU(end),timeEMG(end)]);
                     if size(timeEMG)>0
-                        timeMax = timeEMG(end);
+%                         timeMax = timeEMG(end);
                         disp('No')
-                        idxIMU = timeIMU > timeMax-session.NotifyWhenDataAvailableExceeds;
-%                       idxEMG = timeEMG > timeMax-session.NotifyWhenDataAvailableExceeds;
+%                         idxIMU = timeIMU > timeMax-session.NotifyWhenDataAvailableExceeds;
+%                         idxEMG = timeEMG > timeMax-session.NotifyWhenDataAvailableExceeds;
              
                         % Copy desired data
-                        tq = timeIMU(idxIMU);
-                        q = quat(idxIMU,:);
+%                         tq = timeIMU(idxIMU);
+%                         q = quat(idxIMU,:);
                         te = timeEMG(end-session.NotifyWhenDataAvailableExceeds+1:end);
                         emg = emg(end-session.NotifyWhenDataAvailableExceeds+1:end,:);
     %                     
