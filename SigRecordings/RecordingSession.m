@@ -565,11 +565,15 @@ while ex <= nM
         else
             % Save and go ahead with the next movement..
             recSessionData(:,:,ex) = allData(:,:);      % Save each motion into with new index (in 3rd dimesion)
+            tic;
+            recSessionIMU(:,:,ex) = interp1(imuTime, imuData, emgTime, 'linear', 'extrap');
+            toc;
             % Increase loop index
             ex = ex + 1;
         end
         % Clean global data
         allData = [];
+        imuData = [];
     end
     
 end
@@ -629,11 +633,14 @@ if saveRec                                                             % Saved i
         disp(['User selected ', fullfile(pathname, filename)])
         recSession.tdata = recSessionData;
         if strcmp(deviceName, 'Myo_test')
-            recSession.emgTime = emgTime;
-            recSession.imuTime = imuTime;
-            recSession.imuDataOrig = imuData;
-            % Resample IMU data to EMG time vector
-            recSession.imuData = interp1(imuTime, imuData, emgTime, 'linear', 'extrap');
+            recSession.imudata = recSessionIMU;
+            
+            %Following only saves for last movement
+%             recSession.emgTime = emgTime;
+%             recSession.imuTime = imuTime;
+%             recSession.imuDataOrig = imuData;
+%             % Resample IMU data to EMG time vector
+%             recSession.imuData = interp1(imuTime, imuData, emgTime, 'linear', 'extrap');
         end
         
         save([pathname,filename],'recSession');
