@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and 
-% Chalmers University of Technology. All authors’ contributions must be kept
+% Chalmers University of Technology. All authors? contributions must be kept
 % acknowledged below in the section "Updates % Contributors". 
 %
 % Would you like to contribute to science and sum efforts to improve 
-% amputees’ quality of life? Join this project! or, send your comments to:
+% amputees? quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file 
@@ -35,11 +35,13 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
     nR      = recSession.nR;
     nM      = recSession.nM;
     tdata   = recSession.tdata;
+    imudata = recSession.imudata;
      
     % Collect the 25% to 75% of rest in between each contraction per each
     % movement
     for ex = 1 : nM
     tempdata =[];   
+    tempimu = [];
         for rep = 1 : nR
             % Samples of the exersice to be consider for training
             % (sF*cT*rep) Number of samples that takes a contraction
@@ -47,8 +49,10 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
             is = fix((sF*cT*rep) + (sF*rT*.25) + (sF*rT*(rep-1)) + 1);
             fs = fix((sF*cT*rep) + (sF*rT*.75) + (sF*rT*(rep-1)));
             tempdata = [tempdata ; tdata(is:fs,:,ex)];
+            tempimu = [tempimu ; imudata(is:fs,:,ex)];
         end
         trData(:,:,ex) = tempdata;
+        trDataIMU(:,:,ex) = tempimu;
     end
     
     % Gather the required amount of data for a movement
@@ -64,11 +68,13 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
 %     end
     
     restData = [];
+    restDataIMU = [];
     %Using the first samples of each movement
     is = 1;
     fs = sampXmov;
     for ex = 1 : nM
-        restData = [restData ; trData(is:fs,:,ex)];         
+        restData = [restData ; trData(is:fs,:,ex)];   
+        restDataIMU = [restDataIMU ; trDataIMU(is:fs,:,ex)]; 
     end
     
     % If the rest data set wasn't completed from the information of all
@@ -76,6 +82,7 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
     % the last rest period of the 1st movement
     if size(restData,1) ~= totSamp
         restData = [restData ; trData(end-sd+1:end,:,1)];
+        restDataIMU = [restDataIMU ; trDataIMU(end-sd+1:end,:,1)];
     end
 
     %Random selection of the sets to be use
@@ -92,3 +99,4 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
     sigTreated.nM = sigTreated.nM+1;
     sigTreated.mov(sigTreated.nM) = {'Rest'};
     sigTreated.trData(:,:,sigTreated.nM) = restData;
+    sigTreated.trDataIMU(:,:,sigTreated.nM) = restDataIMU;

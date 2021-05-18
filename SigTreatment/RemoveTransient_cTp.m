@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and 
-% Chalmers University of Technology. All authors’ contributions must be kept
+% Chalmers University of Technology. All authors? contributions must be kept
 % acknowledged below in the section "Updates % Contributors". 
 %
 % Would you like to contribute to science and sum efforts to improve 
-% amputees’ quality of life? Join this project! or, send your comments to:
+% amputees? quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file 
@@ -34,6 +34,7 @@ function sigTreated = RemoveTransient_cTp(recSession, cTp)
     nR      = recSession.nR;
     nM      = recSession.nM;
     tdata   = recSession.tdata;
+    imudata = recSession.imudata;
     
     % New structured for the signal treated
     sigTreated      = recSession;
@@ -44,12 +45,19 @@ function sigTreated = RemoveTransient_cTp(recSession, cTp)
     if isfield(sigTreated,'tdata')
         sigTreated = rmfield(sigTreated,'tdata');         
     end
+    if isfield(sigTreated,'imudata')
+        sigTreated = rmfield(sigTreated,'imudata');         
+    end
     if isfield(sigTreated,'trdata')
         sigTreated = rmfield(sigTreated,'trdata');                 
+    end
+    if isfield(sigTreated,'trdataIMU')
+        sigTreated = rmfield(sigTreated,'trdataIMU');                 
     end
     
     for ex = 1 : nM
         tempdata =[];
+        tempimu = [];
         for rep = 1 : nR
             % Samples of the exersice to be consider for training
             % (sF*cT*(cTp-1)) Number of the samples that wont be consider for training
@@ -58,9 +66,12 @@ function sigTreated = RemoveTransient_cTp(recSession, cTp)
             is = fix((sF*cT*(1-cTp-eRed)) + (sF*cT*(rep-1)) + (sF*rT*(rep-1)) + 1);
             fs = fix((sF*cT*(cTp+eRed)) + (sF*cT*(rep-1)) + (sF*rT*(rep-1)));
             tempdata = [tempdata ; tdata(is:fs,:,ex)];
+            tempimu = [tempimu ; imudata(is:fs,:,ex)];
         end
         trData(:,:,ex) = tempdata;
+        trDataIMU(:,:,ex) = tempimu;
     end
     
     sigTreated.trData = trData;
+    sigTreated.trDataIMU = trDataIMU;
 end

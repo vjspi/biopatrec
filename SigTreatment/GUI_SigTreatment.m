@@ -1,5 +1,5 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec � which is open and free software under  
+% This file is part of BioPatRec ??? which is open and free software under  
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
@@ -151,6 +151,7 @@ function pb_treat_Callback(hObject, eventdata, handles)
     set(phandles.t_msg,'String','Data analyzed');
     
     disp(sigFeatures);
+    %save(sigFeatures);
     close(GUI_SigTreatment);
 
 
@@ -527,7 +528,9 @@ function pb_preProcessing_Callback(hObject, eventdata, handles)
     set(handles.pb_treatFolder,'Enable','on');
     set(handles.pb_preview,'Enable','on');
     disp(sigTreated);
-
+    spath = uigetdir();
+    save([spath '\sigTreated.mat'],'sigTreated');
+    
 
 % --- Executes on selection change in lb_nCh.
 function lb_nCh_Callback(hObject, eventdata, handles)
