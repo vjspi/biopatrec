@@ -580,6 +580,11 @@ end
 % Save data into cdata output matrix
 cdata = recSessionData(:,:,:);
 
+
+if strcmp(deviceName, 'Myo_test')
+    %%resampleImuData
+end
+
 if saveRec                                                             % Saved in DataAnalysis
     
     set(handles.t_msg,'String','Session Terminated');                  % Show message about acquisition completed
@@ -624,7 +629,11 @@ if saveRec                                                             % Saved i
         disp(['User selected ', fullfile(pathname, filename)])
         recSession.tdata = recSessionData;
         if strcmp(deviceName, 'Myo_test')
-            recSession.imudata = imuData;
+            recSession.emgTime = emgTime;
+            recSession.imuTime = imuTime;
+            recSession.imuDataOrig = imuData;
+            % Resample IMU data to EMG time vector
+            recSession.imuData = interp1(imuTime, imuData, emgTime, 'linear', 'extrap');
         end
         
         save([pathname,filename],'recSession');
