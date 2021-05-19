@@ -447,7 +447,7 @@ function pb_treatFolder_Callback(hObject, eventdata, handles)
             % get sigFeatures 
             sigFeatures = GetAllSigFeatures(handles, sigTreated);
             % Save the sigFeatures
-            save([spath '\prePro_' Files(rn).name],'sigFeatures');
+            save(strcat(spath, '\prePro_', string(sigTreated.fFilter), '_', Files(rn).name),'sigFeatures');
         else
             break;
         end 
