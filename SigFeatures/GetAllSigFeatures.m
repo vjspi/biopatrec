@@ -1,5 +1,5 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
@@ -118,6 +118,14 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
     if isfield(sigTreated,'ramp')
         sigFeatures.ramp = sigTreated.ramp;
     end
+    
+        % temporary data transfer of IMU Data (no feature extraction yet)
+    if isfield(sigTreated, 'trDataIMU')
+        sigFeatures.trDataIMU = sigTreated.trDataIMU;
+        sigFeatures.vDataIMU = sigTreated.vDataIMU;
+        sigFeatures.tDataIMU = sigTreated.tDataIMU;
+    end
+
     
 end
 %     for e = 1: Ne
