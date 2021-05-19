@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and 
-% Chalmers University of Technology. All authors’ contributions must be kept
+% Chalmers University of Technology. All authors? contributions must be kept
 % acknowledged below in the section "Updates % Contributors". 
 %
 % Would you like to contribute to science and sum efforts to improve 
-% amputees’ quality of life? Join this project! or, send your comments to:
+% amputees? quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file 
@@ -28,6 +28,8 @@
 % 2016-02-01 / Julian Maier / Added signal separation
 % 2016-03-01 / Julian Maier / Application of conventional filtering after
 %                             signal segmenation.
+% 2021-05-19 / Veronika Spieker  / Added IMU data processing in sigTreated  
+%                                  and sigFeatures struct (if recorded)
 % 20xx-xx-xx / Author  / Comment on update
 
 function sigTreated = TreatData(handles, sigTreated)
@@ -91,6 +93,14 @@ end
 %% Split the data into the time windows
 set(handles.t_msg,'String','Segmenting data...');
 [trData, vData, tData] = GetData(sigTreated);
+
+if isfield(sigTreated, 'trDataIMU')
+    [trDataIMU, vDataIMU, tDataIMU] = GetDataIMU (sigTreated);
+    %Remove raw treated IMU data
+    sigTreated = rmfield(sigTreated,'trDataIMU');
+    disp('IMU Data included.');
+end
+
 %Remove raw treated data
 sigTreated = rmfield(sigTreated,'trData');
 %Save raw testing data
@@ -114,5 +124,10 @@ end
 sigTreated.trData = trData;
 sigTreated.vData = vData;
 sigTreated.tData = tData;
+
+sigTreated.trDataIMU = trDataIMU;
+sigTreated.vDataIMU = vDataIMU;
+sigTreated.tDataIMU = tDataIMU;
+
 
 end
