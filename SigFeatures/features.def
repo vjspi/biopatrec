@@ -1,3 +1,4 @@
+tmn     % Time: Mean value
 tmabs	% Time: Mean absolute value
 tstd	% Time: Standard deviation
 tvar	% Time: Variance
