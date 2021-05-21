@@ -120,7 +120,7 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
     end
     
         % temporary data transfer of IMU Data (no feature extraction yet)
-    if isfield(sigTreated, 'trDataIMU')
+    if strcmp(sigTreated.dev, 'Myo_test')
         sigFeatures.trDataIMU = sigTreated.trDataIMU;
         sigFeatures.vDataIMU = sigTreated.vDataIMU;
         sigFeatures.tDataIMU = sigTreated.tDataIMU;

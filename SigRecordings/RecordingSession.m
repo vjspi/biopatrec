@@ -565,9 +565,13 @@ while ex <= nM
         else
             % Save and go ahead with the next movement..
             recSessionData(:,:,ex) = allData(:,:);      % Save each motion into with new index (in 3rd dimesion)
-            tic;
-            recSessionIMU(:,:,ex) = interp1(imuTime, imuData, emgTime, 'linear', 'extrap');
-            toc;
+            
+            if strcmp(deviceName, 'Myo_test')
+                tic;
+                recSessionIMU(:,:,ex) = interp1(imuTime, imuData, emgTime, 'linear', 'extrap');
+                toc;
+            end
+            
             % Increase loop index
             ex = ex + 1;
         end

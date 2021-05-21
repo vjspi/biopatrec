@@ -94,7 +94,7 @@ end
 set(handles.t_msg,'String','Segmenting data...');
 [trData, vData, tData] = GetData(sigTreated);
 
-if isfield(sigTreated, 'trDataIMU')
+if strcmp(sigTreated.dev, 'Myo_test')
     [trDataIMU, vDataIMU, tDataIMU] = GetDataIMU (sigTreated);
     %Remove raw treated IMU data
     sigTreated = rmfield(sigTreated,'trDataIMU');
@@ -125,9 +125,10 @@ sigTreated.trData = trData;
 sigTreated.vData = vData;
 sigTreated.tData = tData;
 
-sigTreated.trDataIMU = trDataIMU;
-sigTreated.vDataIMU = vDataIMU;
-sigTreated.tDataIMU = tDataIMU;
-
+if strcmp(sigTreated.dev, 'Myo_test')
+    sigTreated.trDataIMU = trDataIMU;
+    sigTreated.vDataIMU = vDataIMU;
+    sigTreated.tDataIMU = tDataIMU;
+end
 
 end

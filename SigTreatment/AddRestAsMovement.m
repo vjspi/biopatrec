@@ -35,13 +35,20 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
     nR      = recSession.nR;
     nM      = recSession.nM;
     tdata   = recSession.tdata;
-    imudata = recSession.imudata;
-     
+    
+    if strcmp(recSession.deviceName, 'Myo_test')
+        imudata = recSession.imudata;
+    end
+    
     % Collect the 25% to 75% of rest in between each contraction per each
     % movement
     for ex = 1 : nM
-    tempdata =[];   
-    tempimu = [];
+    tempdata =[];  
+    
+    if strcmp(recSession.deviceName, 'Myo_test')
+        tempimu = [];
+    end
+    
         for rep = 1 : nR
             % Samples of the exersice to be consider for training
             % (sF*cT*rep) Number of samples that takes a contraction
@@ -49,7 +56,10 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
             is = fix((sF*cT*rep) + (sF*rT*.25) + (sF*rT*(rep-1)) + 1);
             fs = fix((sF*cT*rep) + (sF*rT*.75) + (sF*rT*(rep-1)));
             tempdata = [tempdata ; tdata(is:fs,:,ex)];
-            tempimu = [tempimu ; imudata(is:fs,:,ex)];
+            
+            if strcmp(recSession.deviceName, 'Myo_test')
+                tempimu = [tempimu ; imudata(is:fs,:,ex)];
+            end
         end
         trData(:,:,ex) = tempdata;
         trDataIMU(:,:,ex) = tempimu;
@@ -74,7 +84,9 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
     fs = sampXmov;
     for ex = 1 : nM
         restData = [restData ; trData(is:fs,:,ex)];   
-        restDataIMU = [restDataIMU ; trDataIMU(is:fs,:,ex)]; 
+        if strcmp(recSession.deviceName, 'Myo_test')
+            restDataIMU = [restDataIMU ; trDataIMU(is:fs,:,ex)]; 
+        end
     end
     
     % If the rest data set wasn't completed from the information of all
