@@ -36,7 +36,7 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
     nM      = recSession.nM;
     tdata   = recSession.tdata;
     
-    if strcmp(recSession.deviceName, 'Myo_test')
+    if strcmp(recSession.dev, 'Myo_test')
         imudata = recSession.imudata;
     end
     
@@ -45,7 +45,7 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
     for ex = 1 : nM
     tempdata =[];  
     
-    if strcmp(recSession.deviceName, 'Myo_test')
+    if strcmp(recSession.dev, 'Myo_test')
         tempimu = [];
     end
     
@@ -57,7 +57,7 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
             fs = fix((sF*cT*rep) + (sF*rT*.75) + (sF*rT*(rep-1)));
             tempdata = [tempdata ; tdata(is:fs,:,ex)];
             
-            if strcmp(recSession.deviceName, 'Myo_test')
+            if strcmp(recSession.dev, 'Myo_test')
                 tempimu = [tempimu ; imudata(is:fs,:,ex)];
             end
         end
@@ -84,7 +84,7 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
     fs = sampXmov;
     for ex = 1 : nM
         restData = [restData ; trData(is:fs,:,ex)];   
-        if strcmp(recSession.deviceName, 'Myo_test')
+        if strcmp(recSession.dev, 'Myo_test')
             restDataIMU = [restDataIMU ; trDataIMU(is:fs,:,ex)]; 
         end
     end

@@ -46,7 +46,7 @@ function sigTreated = RemoveTransient_cTp(recSession, cTp)
         sigTreated = rmfield(sigTreated,'tdata');         
     end
     if isfield(sigTreated,'imudata')
-        imudata = recSession.imudata;
+        imudata = sigTreated.imudata;
         sigTreated = rmfield(sigTreated,'imudata');         
     end
     if isfield(sigTreated,'trdata')
@@ -68,7 +68,7 @@ function sigTreated = RemoveTransient_cTp(recSession, cTp)
             fs = fix((sF*cT*(cTp+eRed)) + (sF*cT*(rep-1)) + (sF*rT*(rep-1)));
             tempdata = [tempdata ; tdata(is:fs,:,ex)];
             
-            if strcmp(recSession.deviceName, 'Myo_test')
+            if strcmp(recSession.dev, 'Myo_test')
                 imudata = recSession.imudata;
                 tempimu = [tempimu ; imudata(is:fs,:,ex)];
             end
@@ -76,7 +76,8 @@ function sigTreated = RemoveTransient_cTp(recSession, cTp)
             
         end
         trData(:,:,ex) = tempdata;
-        if strcmp(recSession.deviceName, 'Myo_test')
+        
+        if strcmp(recSession.dev, 'Myo_test')
             trDataIMU(:,:,ex) = tempimu;
         end
         
