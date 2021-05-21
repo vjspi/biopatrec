@@ -150,12 +150,12 @@ for ff = 1 : size(Files)
             end
         end
         
-        
-                
+                        
         X.Properties.VariableNames =  xTitle;
                 
         
-        writetable(X,strcat(path,'\X',erase(Files(ff).name, ".mat"),'.csv'));
+        writetable(X,strcat(path,'\X_imu_',erase(Files(ff).name, ".mat"),'.csv'));
+        save(strcat(path, '\MatlabFormat\X'),'X')
         
         %% Create result vector
         
@@ -168,7 +168,8 @@ for ff = 1 : size(Files)
         end
 
         Y.Properties.VariableNames = yTitle;
-        writetable(Y, strcat(path,'\Y',erase(Files(ff).name, ".mat"),'.csv'));
+        writetable(Y, strcat(path,'\Y_imu_',erase(Files(ff).name, ".mat"),'.csv'));
+        save(strcat(path, '\MatlabFormat\Y'),'Y')
                
     end
 
