@@ -1,5 +1,5 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
@@ -174,7 +174,7 @@ function handlesX = RealtimePatRec(patRecX, handlesX)
 
         % Init SBI
         sCh = patRec.nCh;                                                  % Vector of channels
-        if strcmp(deviceName, 'Thalmic MyoBand')
+        if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test') 
             %CK: init MyoBand
             s = MyoBandSession(sF, sT, sCh);
         else
