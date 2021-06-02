@@ -133,8 +133,11 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
                     disp(['Need to cut off: ', num2str(size(data,1)-session.durationSamples)]);
                     session.emgData = data(1:session.durationSamples,:);
                     session.emgTime = session.myoData.timeEMG_log(1:session.durationSamples,:);
-                    session.imuData = session.myoData.quat_log;
+                    
+                    % IMU Data - extracting fixed data (fixed to reference
+                    % frame rather than in Myo Band coordinate system)
                     session.imuTime = session.myoData.timeIMU_log;
+                    session.imuData = [session.myoData.quat_log, session.myoData.accel_log, session.myoData.gyro_log];      
                     
                 end
 

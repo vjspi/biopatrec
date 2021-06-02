@@ -147,6 +147,8 @@ sT            = cT+rT;
 handles.sTall = sTall;
 handles.sT    = sT;
 
+
+
 % Setting for data peeking
 % Time window size
 % Window of 200 samples works well with buffered sending mode of RHA2132
@@ -246,8 +248,10 @@ drawnow update
 
 % Allocation of resource to improve speed, total data
 recSessionData = zeros(sF*sTall, nCh, nM);
-recSessionIMU = zeros(sF*sTall, 4, nM); %amount of samples - not exactly?
 
+% For IMU data acquisition
+nIMU = 10;
+recSessionIMU = zeros(sF*sTall, nIMU, nM);        
 
 %% Starting Session..
 
