@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and 
-% Chalmers University of Technology. All authors’ contributions must be kept
+% Chalmers University of Technology. All authors? contributions must be kept
 % acknowledged below in the section "Updates % Contributors". 
 %
 % Would you like to contribute to science and sum efforts to improve 
-% amputees’ quality of life? Join this project! or, send your comments to:
+% amputees? quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file 
@@ -305,7 +305,7 @@ function success = TACTest(patRecX, handlesX)
 
                     % Init SBI
                     sCh = 1:nCh;
-                    if strcmp(deviceName, 'Thalmic MyoBand')
+                    if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test')
                         %CK: init MyoBand
                         s = MyoBandSession(sF, sT, sCh);
                     else
@@ -321,11 +321,11 @@ function success = TACTest(patRecX, handlesX)
                         s.wait();
                     end
 %                     delete(lh);
-                    if ~strcmp(deviceName, 'Thalmic MyoBand')
+                    if ~strcmp(deviceName, 'Thalmic MyoBand') && ~strcmp(deviceName, 'Myo_test')
                         delete(lh);
                     end
                     %CK: Stop sampling from MyoBand
-                    if strcmp(deviceName, 'Thalmic MyoBand')
+                    if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test')
                         MyoClient('StopSampling');
                     end
                     

@@ -191,11 +191,11 @@ function handlesX = RealtimePatRec(patRecX, handlesX)
         end
         
         
-        if ~strcmp(deviceName, 'Thalmic MyoBand')
+        if ~strcmp(deviceName, 'Thalmic MyoBand')  && ~strcmp(deviceName, 'Myo_test') 
             delete(lh);
         end
         %CK: Stop sampling from MyoBand
-        if strcmp(deviceName, 'Thalmic MyoBand')
+        if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test')
             MyoClient('StopSampling');
         end
     %%%%% Real Time PatRec with other custom device %%%%%   
