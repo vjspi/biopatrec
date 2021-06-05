@@ -347,6 +347,13 @@ while ex <= nM
     set(handles.a_f0,'YTick',offVector);
     set(handles.a_f0,'YTickLabel',0:nCh-1);
     
+    p_i0 = plot(handles.a_i0, timeStamps, sData);
+    handles.p_i0 = p_i0;
+    xlim(handles.a_i0, [0,tW]);
+    ylim(handles.a_i0, [-pi pi]);
+%     set(handles.a_t0,'YTick',offVector);
+%     set(handles.a_t0,'YTickLabel',0:nCh-1);
+    
     % Repetitions
     %%%%% NI DAQ card %%%%%
     if strcmp (ComPortType, 'NI')
@@ -551,8 +558,21 @@ while ex <= nM
         errordlg('Error occurred during the acquisition!','Error');
         return
     else
+        
+        % Interpolate IMU data if available
+        if strcmp(deviceName, 'Myo_test')
+            tic;
+            recSessionIMU(:,:,ex) = interp1(imuTime, imuData, emgTime, 'linear', 'extrap');
+            toc;
+        end
+            
         % Plot movement just recorded
-        DataShow(handles, allData, sF, sTall);
+         if strcmp(deviceName, 'Myo_test') 
+             DataShowIMU(handles, allData, recSessionIMU(:,:,ex), sF, sTall);
+         else 
+             DataShow(handles, allData, sF, sTall);
+         end
+         
         
         if movRepeatDlg
             prompt = {'Do you want to record this movement again? (y/n)'};
@@ -569,13 +589,6 @@ while ex <= nM
         else
             % Save and go ahead with the next movement..
             recSessionData(:,:,ex) = allData(:,:);      % Save each motion into with new index (in 3rd dimesion)
-            
-            if strcmp(deviceName, 'Myo_test')
-                tic;
-                recSessionIMU(:,:,ex) = interp1(imuTime, imuData, emgTime, 'linear', 'extrap');
-                toc;
-            end
-            
             % Increase loop index
             ex = ex + 1;
         end
@@ -591,6 +604,7 @@ end
 
 % Save data into cdata output matrix
 cdata = recSessionData(:,:,:);
+idata = recSessionIMU(:,:,:) 
 
 
 if strcmp(deviceName, 'Myo_test')

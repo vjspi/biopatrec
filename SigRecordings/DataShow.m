@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and 
-% Chalmers University of Technology. All authors’ contributions must be kept
+% Chalmers University of Technology. All authors? contributions must be kept
 % acknowledged below in the section "Updates % Contributors". 
 %
 % Would you like to contribute to science and sum efforts to improve 
-% amputees’ quality of life? Join this project! or, send your comments to:
+% amputees? quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file 
@@ -85,5 +85,12 @@ function DataShow(handles,cdata, sF, sT)
     xlim(handles.a_f0, [0,sF/2]);
     ymax =  ampPP * nCh;
     ylim(handles.a_f0, [ymin ymax]);
+    
+    axes(handles.a_i0);
+    plot(tt(1:length(tempData(:,1))),tempData);
+    set(handles.a_t0,'YTick',offVector);
+    set(handles.a_t0,'YTickLabel',0:nCh-1);
+    ylim(handles.a_t0, [ymin ymax]);
+    xlim(handles.a_t0, [0 xmax]);
        
 end
