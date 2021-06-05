@@ -49,8 +49,6 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
             if exist('mm','var')  && isa(mm,'MyoMex'), delete(mm);  end
             if exist('tmr','var') && isa(tmr,'timer'), delete(tmr); end
             
-            mm = MyoMex(1);
-            session.myMyoMex = mm;
         end
         
         function lh = addListener(session, eventName, listenerCallback)
@@ -72,6 +70,8 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
                 return;
             end
             
+            mm = MyoMex(1);
+            session.myMyoMex = mm;
             session.myoData = session.myMyoMex.myoData;
             
             %Check if Myo actually on
@@ -109,7 +109,7 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
 %                     %timeMax = max([timeIMU(end),timeEMG(end)]);
                     if size(timeEMG)>0
 %                         timeMax = timeEMG(end);
-                        disp('No')
+%                         disp('No')
 %                         idxIMU = timeIMU > timeMax-session.NotifyWhenDataAvailableExceeds;
 %                         idxEMG = timeEMG > timeMax-session.NotifyWhenDataAvailableExceeds;
              
@@ -173,6 +173,8 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
                 session.IsDone = true;
                 session.IsLogging = false;
                 session.myMyoMex.stopStreaming();
+                
+                delete(timerfindall);
                 %MyoClient('StopSampling');
             end
         end
