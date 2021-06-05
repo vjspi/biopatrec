@@ -112,6 +112,7 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
     set(handles.a_f0,'YTick',offVector);
     set(handles.a_f0,'YTickLabel',0:nCh-1);
     
+    
     % Initialization of progress bar
     xpatch = [0 0 0 0];
     ypatch = [0 0 1 1];
@@ -123,6 +124,8 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
 
     % Allocation of resource to improve speed, total data 
     recSessionData = zeros(sF*sT, nCh);
+    recSessionIMU = zeros(sF*sT, 13);
+
 
 
     %% Starting Session..
@@ -223,7 +226,13 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
             MyoClient('StopSampling');
         elseif strcmp(deviceName, 'Myo_test') 
               allData = s.emgData;
-              s.emgData = [];  
+            imuData = s.imuData;
+            imuTime = s.imuTime;
+            emgTime = s.emgTime;
+            s.emgData = [];  
+            s.imuData = []; 
+            s.emgTime = [];  
+            s.imuTime = []; 
                             
               delete(s.myMyoMex);       %deleting the MatMex object (opened in the beginning)
               s.stop();
@@ -233,6 +242,12 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
 
     % Save Data
     recSessionData = allData;
+    if strcmp(deviceName, 'Myo_test')
+        tic;
+        recSessionIMU = interp1(imuTime, imuData, emgTime, 'linear', 'extrap');
+        toc;
+    end
+            
     
     %% Session finish..
     set(handles.t_msg,'String','Session Terminated');                  % Show message about acquisition completed     
@@ -246,7 +261,14 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
 
     % Data Plot
     cdata = recSessionData;
-    DataShow(handles,cdata(:,1:handles.nCh),sF,sT);
+    idata = recSessionIMU;
+   
+    if strcmp(deviceName, 'Myo_test') 
+        DataShowIMU(handles, cdata(:,1:handles.nCh), idata, sF, sT);
+    else
+         DataShow(handles,cdata(:,1:handles.nCh),sF,sT);
+    end
+         
     
     % Set visible the offline plot and process panels
     set(handles.uipanel9,'Visible','on');   

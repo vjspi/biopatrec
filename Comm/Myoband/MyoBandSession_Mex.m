@@ -137,7 +137,10 @@ classdef MyoBandSession_Mex < matlab.mixin.Heterogeneous & handle
                     % IMU Data - extracting fixed data (fixed to reference
                     % frame rather than in Myo Band coordinate system)
                     session.imuTime = session.myoData.timeIMU_log;
-                    session.imuData = [session.myoData.quat_log, session.myoData.accel_log, session.myoData.gyro_log];      
+                    
+                    %% Choose one of following lines to either capture data in Myo Frame or in fixed reference frame
+                    session.imuData = [session.myoData.quat_log, session.myoData.accel_log, session.myoData.gyro_log, session.myoData.accel_fixed_log]; 
+%                     session.imuData = [session.myoData.quat_log, session.myoData.accel_fixed_log, session.myoData.gyro_fixed_log]; 
                     
                 end
 
