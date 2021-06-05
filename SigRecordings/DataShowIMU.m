@@ -34,6 +34,9 @@
 % 2015-02-23 / Enzo Mastinu / The scale of every channel plot is now the
                             % same scale of the channel which has the
                             % maximum absolute value
+% 2021-06-05 / Veronika Spieker / Added a plot for visualization of the
+                            % Myo orientation in Euler angles (calculated
+                            % from Quaternions)
 
 
 function DataShowIMU(handles,cdata, idata, sF, sT)
