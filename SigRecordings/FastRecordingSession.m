@@ -225,7 +225,7 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
 %             s.stop(); 
             MyoClient('StopSampling');
         elseif strcmp(deviceName, 'Myo_test') 
-              allData = s.emgData;
+            allData = s.emgData;
             imuData = s.imuData;
             imuTime = s.imuTime;
             emgTime = s.emgTime;
@@ -285,4 +285,13 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
     
     chVector = 0:nCh-1;
     set(handles.lb_channels, 'String', chVector);
+   
+    [filename, pathname] = uiputfile({'*.mat','MAT-files (*.mat)'},'Save as', 'Untitled.mat');
+    
+        if strcmp(deviceName, 'Myo_test')
+            eul = quat2eul(idata(:,1:4));
+            save([pathname,filename],'cdata','idata','eul','sF','sT','nCh','ComPortType','deviceName');
+        end
+        
+        
 end
