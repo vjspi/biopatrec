@@ -125,7 +125,7 @@ sigTreated.trData = trData;
 sigTreated.vData = vData;
 sigTreated.tData = tData;
 
-if strcmp(sigTreated.dev, 'Myo_test')
+if sigTreated.multiModal
     sigTreated.trDataIMU = trDataIMU;
     sigTreated.vDataIMU = vDataIMU;
     sigTreated.tDataIMU = tDataIMU;

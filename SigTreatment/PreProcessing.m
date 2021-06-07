@@ -1,5 +1,5 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
@@ -127,6 +127,11 @@ function sigTreated = PreProcessing(handles)
         end
     end
     set(handles.cb_AddArtifact,'Enable','off');
+    
+    % Check if more than EMG data was recorded
+    if strcmp(sigTreated.dev, 'Myo_test')
+        sigTreated.multiModal = true; 
+    end
     
     % Upload sigtreated to the GUI----------------------------------------
     set(handles.t_sigTreated,'UserData',sigTreated);

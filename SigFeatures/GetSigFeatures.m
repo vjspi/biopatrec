@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and 
-% Chalmers University of Technology. All authors’ contributions must be kept
+% Chalmers University of Technology. All authors? contributions must be kept
 % acknowledged below in the section "Updates % Contributors". 
 %
 % Would you like to contribute to science and sum efforts to improve 
-% amputees’ quality of life? Join this project! or, send your comments to:
+% amputees? quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file 
@@ -36,7 +36,7 @@
 %                            procFreature structure (needed for
 %                            cardinality)
 
-function xFeatures = GetSigFeatures(data,sF,fFilter, fID)
+function xFeatures = GetSigFeatures(data, sF, fFilter, fID, dataIMU)
 
     % If not features ID were receved, then compute the following ones:
     if ~exist('fID','var')
@@ -52,7 +52,7 @@ function xFeatures = GetSigFeatures(data,sF,fFilter, fID)
     procFeatures.absdata = abs(data);
     procFeatures.f       = {};
     procFeatures.filter       = fFilter;
-    
+        
     % Add data of the fast fourier transform if a frequency feature is
     % required
     % This verification needs to be optimized
@@ -64,6 +64,14 @@ function xFeatures = GetSigFeatures(data,sF,fFilter, fID)
         end
     end
     
+    % Add IMU data if imu feature is required
+    % This verification needs to be optimized
+    if sigTreated.multiModal
+        procFeatures.idata  = dataIMU;            
+    else
+        disp('No IMU data provided but listed in features');
+    end
+
     % Calculate signal features
     for i = 1 : size(fID,1)
         fName = ['GetSigFeatures_' fID{i}];
@@ -493,3 +501,11 @@ function pF = GetSigFeatures_tfdh(pF)
     
 end
 
+
+% ######################### Frequency Features ###################
+
+% -----------------------------------------------
+function pF = GetSigFeatures_itmn(pF)
+% 2021-06-07 Veronika Spieker / Creation to process IMU Data from Myo Band
+    pF.f.itmn = mean(pF.idata);
+end

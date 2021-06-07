@@ -31,6 +31,8 @@
 %                             of GetSigFeatures()
 % 2017-04-04 / Jake Gusman  / Added 'ramp' term to sigFeatures structure from
 %                             sigTreated
+% 2021-06-07 / Veronika Spieker  / Added IMU feature processing if
+%                                  corresponding recording method was selected
 
 function sigFeatures = GetAllSigFeatures(handles, sigTreated)
 
@@ -40,6 +42,7 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
     sigFeatures.mov     = sigTreated.mov;
     sigFeatures.scaled  = sigTreated.scaled;
     sigFeatures.noise   = sigTreated.noise;
+    sigFeatures.fID     = LoadFeaturesIDs('features.def');
 
     % ALCD
     sigFeatures.wOverlap= sigTreated.wOverlap;
@@ -64,9 +67,21 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
     % temporal conditional to keep compatibility with olrder rec session
     if isfield(sigTreated,'dev')
         sigFeatures.dev     = sigTreated.dev;
+        
+        if sigTreated.multiModal
+            sigFeatures.fID = LoadFeaturesIDs('featuresIMU.def');
+            
+        % Currently hardcoded to only process Quaternions
+        % ToDo: Add option to select different data from the IMU
+            trDataIMU = sigTreated.trDataIMU(:,1:4,:,:);
+            vDataIMU = sigTreated.vDataIMU(:,1:4,:,:);
+            tDataIMU = sigTreated.tDataIMU(:,1:4,:,:);
+        end
+        
     else
         sigFeatures.dev     = 'Unknow';
     end 
+
     
     if isfield(sigTreated,'comm')
         sigFeatures.comm    = sigTreated.comm;
@@ -82,14 +97,18 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
     sigFeatures.trSets  = sigTreated.trSets;
     sigFeatures.vSets   = sigTreated.vSets;
     sigFeatures.tSets   = sigTreated.tSets;
-
+    
     nM = sigTreated.nM;          % Number of exercises
     
     set(handles.t_msg,'String','Extracting ALL features for training...');
     drawnow;
     for m = 1: nM
         for i = 1 : sigTreated.trSets
-            trFeatures(i,m) = GetSigFeatures(sigTreated.trData(:,:,m,i),sigTreated.sF,sigTreated.fFilter);
+            if sigTreated.multiModal
+                trFeatures(i,m) = GetSigFeatures(sigTreated.trData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID, trDataIMU(:,:,m,i));
+            else
+                trFeatures(i,m) = GetSigFeatures(sigTreated.trData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID);
+            end
         end
     end
 
@@ -97,7 +116,11 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
     drawnow;
     for m = 1: nM
         for i = 1 : sigTreated.vSets
-            vFeatures(i,m) = GetSigFeatures(sigTreated.vData(:,:,m,i),sigTreated.sF,sigTreated.fFilter);
+            if sigTreated.multiModal
+                vFeatures(i,m) = GetSigFeatures(sigTreated.vData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID, vDataIMU(:,:,m,i));
+            else
+                vFeatures(i,m) = GetSigFeatures(sigTreated.vData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID);
+            end
         end
     end
     
@@ -105,8 +128,13 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
     drawnow;
     for m = 1: nM
         for i = 1 : sigTreated.tSets
+            if sigTreated.multiModal
+                tFeatures(i,m) = GetSigFeatures(sigTreated.tData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID, tDataIMU(:,:,m,i));
+            else
+                tFeatures(i,m) = GetSigFeatures(sigTreated.tData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID);
+            end
             %tFeatures(i,m) = analyze_signal(sigTreated.tData(:,:,m,i),sigTreated.sF);
-            tFeatures(i,m) = GetSigFeatures(sigTreated.tData(:,:,m,i),sigTreated.sF, sigTreated.fFilter);
+            %tFeatures(i,m) = GetSigFeatures(sigTreated.tData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID, tDataIMU(:,:,m,i));
         end
     end
     
@@ -118,15 +146,7 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
     if isfield(sigTreated,'ramp')
         sigFeatures.ramp = sigTreated.ramp;
     end
-    
-        % temporary data transfer of IMU Data (no feature extraction yet)
-    if strcmp(sigTreated.dev, 'Myo_test')
-        sigFeatures.trDataIMU = sigTreated.trDataIMU;
-        sigFeatures.vDataIMU = sigTreated.vDataIMU;
-        sigFeatures.tDataIMU = sigTreated.tDataIMU;
-    end
 
-    
 end
 %     for e = 1: Ne
 %         for i = 1 : sigTreated.nw

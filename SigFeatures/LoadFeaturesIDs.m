@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and 
-% Chalmers University of Technology. All authors’ contributions must be kept
+% Chalmers University of Technology. All authors? contributions must be kept
 % acknowledged below in the section "Updates % Contributors". 
 %
 % Would you like to contribute to science and sum efforts to improve 
-% amputees’ quality of life? Join this project! or, send your comments to:
+% amputees? quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file 
@@ -17,15 +17,20 @@
 %
 % ------------------- Function Description ------------------
 %
-% Reads the file features.def and loads the data into motor objects.
+% Reads the file specified in the input (or features.def if no input is given)
+% and loads the data into motor objects.
 %
 % --------------------------Updates--------------------------
 % 2012-07-18 / Max Ortiz  / Creation
-% 20xx-xx-xx / Author  / Comment on update
+% 2021-06-07 / Veronika Spieker  / Included optional input variable "filename"
 
-function fID = LoadFeaturesIDs
+function fID = LoadFeaturesIDs(filename)
 
-fileid = fopen('features.def');
+if ~exist('filename', 'var')
+    filename = 'features.def';            
+end
+
+fileid = fopen(filename);
 tline = fgetl(fileid);
 i=1;
 fID = {};
