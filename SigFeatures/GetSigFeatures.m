@@ -66,11 +66,24 @@ function xFeatures = GetSigFeatures(data, sF, fFilter, fID, dataIMU)
     
     % Add IMU data if imu feature is required
     % This verification needs to be optimized
-    if sigTreated.multiModal
-        procFeatures.idata  = dataIMU;            
-    else
-        disp('No IMU data provided but listed in features');
+    for i = 1 : size(fID,1)
+        temp = fID{i};
+        if temp(1) == 'i'
+            if exist('dataIMU','var')   
+                procFeatures.idata  = dataIMU;         
+                break;
+            else 
+                disp('IMU features selected but not recorded');
+                break;
+            end       
+        end
     end
+
+%     if sigTreated.multiModal
+%         procFeatures.idata  = dataIMU;            
+%     else
+%         disp('No IMU data provided but listed in features');
+%     end
 
     % Calculate signal features
     for i = 1 : size(fID,1)
