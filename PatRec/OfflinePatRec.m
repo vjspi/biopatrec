@@ -117,7 +117,7 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
     
     
     %% Extract data set
-    SaveFeatureSet(selFeatures, trSets, vSets, tSets, movLables, trOuts, vOuts, tOuts, cd)
+%     SaveFeatureSet(selFeatures, trSets, vSets, tSets, movLables, trOuts, vOuts, tOuts, cd)
     
     %% Floor noise
     if strcmp(movLables(end),'Rest')

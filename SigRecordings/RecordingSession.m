@@ -604,7 +604,7 @@ end
 
 % Save data into cdata output matrix
 cdata = recSessionData(:,:,:);
-idata = recSessionIMU(:,:,:) 
+idata = recSessionIMU(:,:,:);
 
 
 if strcmp(deviceName, 'Myo_test')
