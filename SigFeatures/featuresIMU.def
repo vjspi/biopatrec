@@ -53,10 +53,6 @@ tfd     % Time: Fractal dimension
 tcard   % Time: Cardinality
 tren	% Time: Rough Entropy
 
-IMU:
-itmn    % Time: Mean value of imu
-
-
 Frequency:
 
 fwl	% Freq: wave length
@@ -65,3 +61,8 @@ fmd	% Freq: median
 fpmn	% Freq: peak mean
 fpmd	% Freq: peak median
 fpstd	% Freq: peak std
+
+IMU:
+itmn_quat % Time: Mean value for IMU quaternions
+itmn_acc % Time: Mean value for IMU acceleration
+itmn_gyr % Time: Mean value for IMU gyroscope
