@@ -60,10 +60,16 @@ else
     sigTreated.wOverlap = str2double(get(handles.et_wOverlap,'String'));
 end
 
-if get(handles.pm_SignalSeparation,'Value') ~=1,
+if get(handles.pm_SignalSeparation,'Value') ~=1
     allSigSeparaAlg             = get(handles.pm_SignalSeparation,'String');
     selSigSeparaAlg             = allSigSeparaAlg(get(handles.pm_SignalSeparation,'Value'));
     sigTreated.sigSeparation.Alg= selSigSeparaAlg;
+end
+
+if get(handles.pm_imuProcessing,'Value') ~=1
+    allImuProcessing            = get(handles.pm_imuProcessing,'String');
+    selImuProcessing            = allImuProcessing(get(handles.pm_imuProcessing,'Value'));
+    sigTreated.imuProcessing    = selImuProcessing;
 end
 
 if ~isempty(get(handles.t_denoiseParams,'UserData'))
@@ -113,6 +119,11 @@ disp('Data segmented.');
 set(handles.t_msg,'String','Applying filters segmentwise...');
 [trData, vData, tData] = ApplyFiltersEpochs(sigTreated, trData, vData, tData);
 disp('Selected filters applied to each segment.');
+
+%% IMU Data Processing
+if isfield(sigTreated, 'imuProcessing')
+    [trDataIMU, vDataIMU, tDataIMU] = ApplyIMUFiltersEpochs(sigTreated, trDataIMU, vDataIMU, tDataIMU);
+end
 
 %% Sig Separation - Apply calculated ICA unmixing Matrix W
 if isfield(sigTreated,'sigSeparation')

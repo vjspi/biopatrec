@@ -112,6 +112,7 @@ function pb_treat_Callback(hObject, eventdata, handles)
     set(handles.t_msg,'String','Treating the data...');
 
     sigTreated = get(handles.t_sigTreated,'UserData');
+   
         
     % Treat the Data ----------------------------------------------------
     sigTreated = TreatData(handles, sigTreated); % Treat Data
@@ -528,8 +529,8 @@ function pb_preProcessing_Callback(hObject, eventdata, handles)
     set(handles.pb_treatFolder,'Enable','on');
     set(handles.pb_preview,'Enable','on');
     disp(sigTreated);
-    spath = uigetdir();
-    save([spath '\sigTreated.mat'],'sigTreated');
+%     spath = uigetdir();
+%     save([spath '\sigTreated.mat'],'sigTreated');
     
 
 % --- Executes on selection change in lb_nCh.
@@ -774,6 +775,24 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+% --- Executes on selection change in pm_IMUData.
+function pm_imuProcessing_Callback(hObject, eventdata, handles)
+% hObject    handle to pm_imuProcessing (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes during object creation, after setting all properties.
+function pm_imuProcessing_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pm_imuProcessing (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
 
 
 function et_downsample_Callback(hObject, eventdata, handles)
