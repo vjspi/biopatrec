@@ -33,10 +33,9 @@ Fc = 20;  % Cutoff Frequency
 
 % Calculate the zpk values using the BUTTER function.
 [z,p,k] = butter(N, Fc/(Fs/2), 'low');
+[sos_var,g] = zp2sos(z,p,k);
 
-[sos_var,g] = zp2sos(z, p, k);
-Hd          = dfilt.df2sos(sos_var, g);
+dataf = filtfilt(sos_var, g, data);
 
-dataf = filter(Hd,data);
 
 
