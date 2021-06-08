@@ -71,11 +71,6 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
         if sigTreated.multiModal
             sigFeatures.fID = LoadFeaturesIDs('featuresIMU.def');
             
-        % Currently hardcoded to only process Quaternions
-        % ToDo: Add option to select different data from the IMU
-            trDataIMU = sigTreated.trDataIMU(:,1:4,:,:);
-            vDataIMU = sigTreated.vDataIMU(:,1:4,:,:);
-            tDataIMU = sigTreated.tDataIMU(:,1:4,:,:);
         end
         
     else
@@ -105,7 +100,7 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
     for m = 1: nM
         for i = 1 : sigTreated.trSets
             if sigTreated.multiModal
-                trFeatures(i,m) = GetSigFeatures(sigTreated.trData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID, trDataIMU(:,:,m,i));
+                trFeatures(i,m) = GetSigFeatures(sigTreated.trData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID, sigTreated.trDataIMU(:,:,m,i));
             else
                 trFeatures(i,m) = GetSigFeatures(sigTreated.trData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID);
             end
@@ -117,7 +112,7 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
     for m = 1: nM
         for i = 1 : sigTreated.vSets
             if sigTreated.multiModal
-                vFeatures(i,m) = GetSigFeatures(sigTreated.vData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID, vDataIMU(:,:,m,i));
+                vFeatures(i,m) = GetSigFeatures(sigTreated.vData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID, sigTreated.vDataIMU(:,:,m,i));
             else
                 vFeatures(i,m) = GetSigFeatures(sigTreated.vData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID);
             end
@@ -129,7 +124,7 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
     for m = 1: nM
         for i = 1 : sigTreated.tSets
             if sigTreated.multiModal
-                tFeatures(i,m) = GetSigFeatures(sigTreated.tData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID, tDataIMU(:,:,m,i));
+                tFeatures(i,m) = GetSigFeatures(sigTreated.tData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID, sigTreated.tDataIMU(:,:,m,i));
             else
                 tFeatures(i,m) = GetSigFeatures(sigTreated.tData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID);
             end

@@ -16,7 +16,12 @@ tren	% Time: Rough Entropy
 fwl	% Freq: wave length
 fmn	% Freq: mean
 fmd	% Freq: median
-itmn
+itmn_quat % Time: Mean value for IMU quaternions
+itmn_acc % Time: Mean value for IMU acceleration
+itmn_gyr % Time: Mean value for IMU gyroscope
+
+
+
 
 NOTE: Not all features are used constantly so
 some of them are left out to improve speed

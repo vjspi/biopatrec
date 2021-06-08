@@ -515,10 +515,21 @@ function pF = GetSigFeatures_tfdh(pF)
 end
 
 
-% ######################### Frequency Features ###################
-
+% ######################### IMU Features ###################
+% Assuming a IMU data structure of quat (1:4), acc (5:7), gyro (8:10)
 % -----------------------------------------------
-function pF = GetSigFeatures_itmn(pF)
+function pF = GetSigFeatures_itmn_quat(pF)
 % 2021-06-07 Veronika Spieker / Creation to process IMU Data from Myo Band
-    pF.f.itmn = mean(pF.idata);
+    pF.f.itmn_quat = mean(pF.idata(:,1:4));
 end
+
+function pF = GetSigFeatures_itmn_acc(pF)
+% 2021-06-07 Veronika Spieker / Creation to process IMU Data from Myo Band
+    pF.f.itmn_acc = mean(pF.idata(:,5:7));
+end
+
+function pF = GetSigFeatures_itmn_gyr(pF)
+% 2021-06-07 Veronika Spieker / Creation to process IMU Data from Myo Band
+    pF.f.itmn_gyr =  mean(pF.idata(:,8:10));
+end
+
