@@ -122,9 +122,11 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
     handles.hPatch = patch(xpatch,ypatch,'b','EdgeColor','b','visible','on');
     drawnow update % 2014b figure updates
 
+    
     % Allocation of resource to improve speed, total data 
     recSessionData = zeros(sF*sT, nCh);
-    recSessionIMU = zeros(sF*sT, 13);
+    nIMU = 10;
+    recSessionIMU = zeros(sF*sT, nIMU);
 
 
 

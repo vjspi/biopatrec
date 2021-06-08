@@ -250,7 +250,7 @@ drawnow update
 recSessionData = zeros(sF*sTall, nCh, nM);
 
 % For IMU data acquisition
-nIMU = 13;
+nIMU = 10;
 recSessionIMU = zeros(sF*sTall, nIMU, nM);        
 
 %% Starting Session..
