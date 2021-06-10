@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and 
-% Chalmers University of Technology. All authors’ contributions must be kept
+% Chalmers University of Technology. All authors? contributions must be kept
 % acknowledged below in the section "Updates % Contributors". 
 %
 % Would you like to contribute to science and sum efforts to improve 
-% amputees’ quality of life? Join this project! or, send your comments to:
+% amputees? quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file 
@@ -53,7 +53,7 @@ function varargout = GUI_PatRec(varargin)
 
 % Edit the above text to modify the response to help GUI_PatRec
 
-% Last Modified by GUIDE v2.5 19-May-2017 16:56:56
+% Last Modified by GUIDE v2.5 10-Jun-2021 14:45:45
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -94,6 +94,10 @@ axis off
 
 % Choose default command line output for GUI_PatRec
 handles.output = hObject;
+
+% Disable position specific analysis (only available when position data is
+% loaded)
+set(handles.cb_posPerf, 'Value' , 0.0);
 
 % Update handles structure
 guidata(hObject, handles);
@@ -343,6 +347,14 @@ function pb_GetFeatures_Callback(hObject, eventdata, handles)
             set(handles.rb_top4,'Enable','on'); 
         end
     end
+    
+    % Check if position specific classification can be enabled
+    sigFeatures = get(handles.t_sigFeatures,'UserData');
+    if isfield(sigFeatures, 'pos')
+        set(handles.cb_posPerf, 'Enable', 'on');
+        set(handles.cb_posPerf, 'Value', 1.0);
+    end    
+    
     guidata(hObject,handles);
     
     
@@ -414,6 +426,9 @@ function pb_RunOfflineTraining_Callback(hObject, eventdata, handles)
     else
         algConf = [];
     end
+    
+    %Adaptive Learner
+    % Expand the data set here!!!!!!!!! Then feed into Offline PatRec...
 
     %Select topology
     allTopologies = get(handles.pm_SelectTopology,'String');
@@ -1650,6 +1665,13 @@ function cb_confMat_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of cb_confMat
 
+% --- Executes on button press in cb_posPerf.
+function cb_posPerf_Callback(hObject, eventdata, handles)
+% hObject    handle to cb_posPerf (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of cb_posPerf
 
 
 function et_trTime_Callback(hObject, eventdata, handles)

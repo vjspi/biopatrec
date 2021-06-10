@@ -80,6 +80,10 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
         patRec.comm = 'N/A';
     end
     
+    
+    %% Todo: Processing of position!!!!!!
+    %%
+    
     % Ramp training data
     if isfield(sigFeatures,'ramp')
         patRec.control.rampTrainingData.ramp = sigFeatures.ramp;
@@ -91,6 +95,7 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
     %% Randomize data (if requested)
     if randFeatures
         sigFeatures = Rand_sigFeatures(sigFeatures);
+        % Add correct randomization of position as well
     end
     
      %% Get data sets
