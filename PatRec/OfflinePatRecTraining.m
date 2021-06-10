@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec ? which is open and free software under 
+% This file is part of BioPatRec © which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and 
-% Chalmers University of Technology. All authors? contributions must be kept
+% Chalmers University of Technology. All authors’ contributions must be kept
 % acknowledged below in the section "Updates % Contributors". 
 %
 % Would you like to contribute to science and sum efforts to improve 
-% amputees? quality of life? Join this project! or, send your comments to:
+% amputees’ quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file 
@@ -57,13 +57,7 @@ function patRec = OfflinePatRecTraining(alg, tType, algConf, trSets, trOuts, vSe
         [coeff accV] = DiscriminantAnalysis(tType, trSets, trOuts, vSets, vOuts, mov, movIdx);
         patRec.algorithm = 'DA';
         patRec.training = tType;
-        patRec.coeff = coeff;    
-        
-    elseif strcmp(alg, 'Discriminant A. (V2)')
-        [classifier accV] = DiscriminantAnalysis_v2(tType, trSets, trOuts, vSets, vOuts, mov, movIdx);
-        patRec.algorithm = 'DA_v2';
-        patRec.training = tType;
-        patRec.classifier = classifier;
+        patRec.coeff = coeff;        
         
     % RFN    
     elseif strcmp(alg,'RFN')
