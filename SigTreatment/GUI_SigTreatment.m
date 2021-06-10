@@ -113,7 +113,6 @@ function pb_treat_Callback(hObject, eventdata, handles)
 
     sigTreated = get(handles.t_sigTreated,'UserData');
    
-        
     % Treat the Data ----------------------------------------------------
     sigTreated = TreatData(handles, sigTreated); % Treat Data
     if isfield(sigTreated,'stopFlag')
@@ -124,6 +123,16 @@ function pb_treat_Callback(hObject, eventdata, handles)
     set(handles.t_msg,'String','Extracting signal features');
     drawnow;
     sigFeatures = GetAllSigFeatures(handles, sigTreated);
+    
+     % get position estimation-------------------------------------------
+    if ~get(handles.pm_posEstimation,'Value') ~=1
+%         sigFeatures = EstimatePosition(handles, sigFeatures);   
+        try
+            sigFeatures = EstimatePosition(handles, sigFeatures);    
+        catch
+            disp('No IMU features available for position estimation!')
+        end 
+    end
 
     
     % Get back in the parent GUI ----------------------------------------
@@ -444,9 +453,13 @@ function pb_treatFolder_Callback(hObject, eventdata, handles)
             % Pre-processing
             sigTreated = PreProcessing(handles);            
             % Treat the Data
-            sigTreated = TreatData(handles, sigTreated);    
+            sigTreated = TreatData(handles, sigTreated);  
             % get sigFeatures 
             sigFeatures = GetAllSigFeatures(handles, sigTreated);
+            % Estimate Position if IMU provided/selected
+            if sigTreated.multiModal
+                sigFeatures = EstimatePosition(handles, sigFeatures);    
+            end
             % Save the sigFeatures
             save(strcat(spath, '\prePro_', string(sigTreated.fFilter), '_', Files(rn).name),'sigFeatures');
         else
@@ -528,6 +541,11 @@ function pb_preProcessing_Callback(hObject, eventdata, handles)
     set(handles.pb_treat,'Enable','on');
     set(handles.pb_treatFolder,'Enable','on');
     set(handles.pb_preview,'Enable','on');
+    
+    if sigTreated.multiModal
+        set(handles.pm_posEstimation, 'Value', 2);
+    end
+    
     disp(sigTreated);
 %     spath = uigetdir();
 %     save([spath '\sigTreated.mat'],'sigTreated');
@@ -794,6 +812,17 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+% --- Executes during object creation, after setting all properties.
+function pm_posEstimation_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pm_posEstimation (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
 
 function et_downsample_Callback(hObject, eventdata, handles)
 % hObject    handle to et_downsample (see GCBO)
