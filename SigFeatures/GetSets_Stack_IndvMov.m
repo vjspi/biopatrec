@@ -156,6 +156,15 @@ for j = 1 : nMm;
         
 end
 
+ %% Stack pos data as well
+ % How can uneven data amount be handled? Simply adding at the end?
+bEmptySamples = all(trSet == 0, 2);
+idxEmptySamples = find(bEmptySamples == 1);
+for i = 1:length(idxEmptySamples)
+ idxNew = idxEmptySamples(i)-i+1;
+ trSet(idxNew,:) = [];
+ trOut(idxNew,:) = [];
+end
 
 
 
