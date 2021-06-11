@@ -37,6 +37,7 @@
 %
 % ------------- Updates -------------
 %  2011-10-03 / Max Ortiz / Created
+% 2021-06-11 / Veronika Spieker  / Adjust stacking of data if an unequal group size is used for training
 % 20xx-xx-xx / Author  / Comment on update
 
 function [trSet, trOut, vSet, vOut, tSet, tOut, movIdx, movOutIdx] = GetSets_Stack_IndvMov(sigFeatures, features)
