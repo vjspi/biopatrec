@@ -65,6 +65,12 @@ nMm   = size(movIdxMix,2);        % Number of movements mixed
 
 trSets = sigFeatures.eTrSets;     % effective number of sets for trainning
 
+% Testing of adding single hand motions and more features
+% Additional feature for one movement leads to empty struct for others
+% sigFeatures.trFeatures(end+1,1) = sigFeatures.vFeatures(1,1);
+% sigFeatures.trFeatures(end+1,:) = sigFeatures.vFeatures(end,:);
+% trSets = sigFeatures.trSets+2;
+
 if isempty(sigFeatures.vFeatures)
     vSets = 0;
 else
