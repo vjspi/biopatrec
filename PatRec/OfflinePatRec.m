@@ -253,8 +253,59 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
 
     [performance confMat tTime] = Accuracy_patRec(patRec, tSets, tOuts, confMatFlag);
     patRec.tTime = tTime;
+    
+    % Position specific performance (if selected)
+    if posPerfFlag
+        [performancePos confMatPos tTimePos sMPos] = PositionPerformance_patRec(patRec, tSets, tOuts, tPos, confMatFlag);
+    end
+    
+    %% Test if performancePos is correct (backcalculation)
+%     
+%     % get data from known function(s)
+%     [performance confMat tTime sM] = Accuracy_patRec(patRec, tSets, tOuts, confMatFlag); % ConfMatFlag = 0
+%     [performance2 confMat2 tTime2 sM] = Accuracy_patRec_unequalSampleSize(patRec, tSets, tOuts, confMatFlag);
+%     
+%     % Check SAMPLE SIZE
+%     if sum(sMPos,2) ~= sM
+%         disp('Mismatch of summed samples over all positions and total sample size')
+%     end
+%     
+%     % Check CONF MATRIX (if position separation was correct)
+%     confMatTest = zeros(size(confMat));
+%     for j = 1:length(performancePos)
+%         confMatTest = confMatTest + confMatPos{j}.*sMPos(:,j);
+%     end
+%     decimal = 3; % round to avoid mismatches due to calculations 
+%     confMatTest = round(10^decimal*confMatTest)/10^decimal;
+%     if confMatTest ~= confMat2.*sM;
+%         disp('Backcalculated confusion matrices do not match - error in data set division by position.')
+%     end
+%     
+%     % Check ACCURACY(if position separation was correct)
+%     accFrac = zeros(patRec.nM +1, length(performancePos));
+%     accTest = zeros(size(performance.acc));
+%     
+%     for j = 1:length(performancePos)
+%         % What fraction of each hand motion is represented in what position?
+%         accFrac(:,j) = [sMPos(:,j); sum(sMPos(:,j))]./[sum(sMPos,2);sum(sum(sMPos,2))];
+%         
+%         % NaN if no samples available in one position 
+%         % (division by sample size 0) -> Replace these values with 0
+%         idxNaN = isnan(performancePos{j}.acc);
+%         perfTemp = performancePos{j}.acc; perfTemp(idxNaN) = 0;
+%         
+%         accTest = accTest + perfTemp .*accFrac(:,j); 
+% %         accTest(isnan) = 0;
+%     end
+%             
+%     if accTest ~= performance.acc;
+%         disp('Backcalculated accuracy does not match - error in data set division by position.')
+%     end
+%         
+   
 
     %% Final data to the patRec
+    patRec.tTime = tTime;
     patRec.performance  = performance;
     patRec.confMat      = confMat;
     patRec.date         = fix(clock);
