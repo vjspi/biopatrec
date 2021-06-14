@@ -72,7 +72,7 @@ for p = 1:nPos
     tSetPos{p} = tSet(idxPos{p},:);
     tOutPos{p} = tOut(idxPos{p},:);
     
-    [perf confMat tTime sM] = Accuracy_patRec_unequalSampleSize(patRec, tSetPos{p}, tOutPos{p}, confMatFlag);
+    [perf confMat tTime sM] = Accuracy_patRec(patRec, tSetPos{p}, tOutPos{p}, confMatFlag, 1); % posPerfFlag on (since this script only runs if Flag is true)
     perfPos{p} = perf;
     confMatPos{p} = confMat;
     tTimePos(p) = tTime;
