@@ -411,6 +411,9 @@ function pb_RunOfflineTraining_Callback(hObject, eventdata, handles)
     %Confusion matrix
     confMatFlag = get(handles.cb_confMat,'Value');
     
+    %Performance specific performance
+    posPerfFlag = get(handles.cb_posPerf,'Value');
+    
     % Signal features
     fIdx = get(handles.lb_features,'Value');
     features = get(handles.lb_features,'String');
@@ -435,7 +438,7 @@ function pb_RunOfflineTraining_Callback(hObject, eventdata, handles)
     topology      = char(allTopologies(get(handles.pm_SelectTopology,'Value')));
     
     % Call rutine for offline pat rec
-    patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets, alg, tType, algConf, movMix, topology, confMatFlag, featReducAlg);
+    patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets, alg, tType, algConf, movMix, topology, confMatFlag, featReducAlg, posPerfFlag);
         
     % Save and show results
     handles.patRec = patRec;
