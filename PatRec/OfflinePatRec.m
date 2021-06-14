@@ -266,7 +266,7 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
 %     [performance2 confMat2 tTime2 sM] = Accuracy_patRec_unequalSampleSize(patRec, tSets, tOuts, confMatFlag);
 %     
 %     % Check SAMPLE SIZE
-%     if sum(sMPos,2) ~= sM
+%     if any(sum(sMPos,2) ~= sM);
 %         disp('Mismatch of summed samples over all positions and total sample size')
 %     end
 %     
@@ -275,9 +275,8 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
 %     for j = 1:length(performancePos)
 %         confMatTest = confMatTest + confMatPos{j}.*sMPos(:,j);
 %     end
-%     decimal = 3; % round to avoid mismatches due to calculations 
-%     confMatTest = round(10^decimal*confMatTest)/10^decimal;
-%     if confMatTest ~= confMat2.*sM;
+% 
+%     if any(abs(confMatTest - confMat2.*sM) >= 1e-10);
 %         disp('Backcalculated confusion matrices do not match - error in data set division by position.')
 %     end
 %     
@@ -297,8 +296,8 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
 %         accTest = accTest + perfTemp .*accFrac(:,j); 
 % %         accTest(isnan) = 0;
 %     end
-%             
-%     if accTest ~= performance.acc;
+%     
+%     if any(abs(accTest - performance.acc) >= 1e-10);
 %         disp('Backcalculated accuracy does not match - error in data set division by position.')
 %     end
 %         
