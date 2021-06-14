@@ -113,6 +113,26 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
         [trSets, trOuts, vSets, vOuts, tSets, tOuts, movIdx, movOutIdx] = GetSets_Stack_MixedOut(sigFeatures, selFeatures);
 
      end
+          
+     %% Stack pos data as well
+     % Only tested for individual movement
+     if posPerfFlag
+         tPos = reshape(sigFeatures.tPos,[],1);
+         % check size
+         if length(tPos) ~= length(tOuts)
+             disp('Error in positional data - mismatch of amount of features and positions')
+         end
+     end
+     
+     %%
+     % How can uneven data amount be handled? Simply adding at the end?
+%      bEmptySamples = all(trSets == 0, 2);
+%      idxEmptySamples = find(bEmptySamples == 1);
+%      for i = 1:length(idxEmptySamples)
+%          trSets(idxEmptySamples(i)-i+1,:) = [];
+%          trOuts(idxEmptySamples(i)-i+1,:) = [];
+%      end
+          
      patRec.movOutIdx = movOutIdx;
      movLables = sigFeatures.mov(movIdx);  
      
@@ -257,6 +277,27 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
     % Position specific performance (if selected)
     if posPerfFlag
         [performancePos confMatPos tTimePos sMPos] = PositionPerformance_patRec(patRec, tSets, tOuts, tPos, confMatFlag);
+        
+        if confMatFlag
+            % Plot position dependent confusion matrices
+            figure;
+            tlo = tiledlayout(2,2);
+            for p = 1:length(performancePos)
+                h(p) = nexttile(tlo);
+                confMatPos{p}(isnan(confMatPos{p}))=0;  % Replace NaN values (due to division by zero if hand motion not present in one position)
+
+                imagesc(confMatPos{p});
+                title(['Position ', num2str(p)])
+                xlabel('Movements'); ylabel('Movements');
+                set(h, 'CLim', [0 1]);
+                colorbar;
+            end
+            h(p+1) = nexttile(tlo);
+            imagesc(confMat); 
+            title('All Positions');
+            set(h, 'CLim', [0 1]);
+            colorbar;
+        end
     end
     
     %% Test if performancePos is correct (backcalculation)

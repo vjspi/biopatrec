@@ -33,7 +33,7 @@
 % 2021-06-14 / Veronika Spieker  / Adjusted performance caluclation to be
 %                                  independent of sample size (including
 
-function [performance, confMat, tTime, sM] = Accuracy_patRec(patRec, tSet, tOut, confMatFlag)
+function [performance, confMat, tTime, sM] = Accuracy_patRec(patRec, tSet, tOut, confMatFlag, posPerfFlag)
 
 % Init variables
 nM      = size(patRec.mov,1);       % Number of movements (total)
@@ -211,9 +211,12 @@ if confMatFlag
 %     end
     confMat = confMat ./ sM; 
     confMat(isnan(confMat))=0;  % Replace NaN values (due to division by zero if hand motion not present in one position)
-    figure;
-    imagesc(confMat);
-    title('Confusion Matrix')
-    xlabel('Movements');
-    ylabel('Movements');
+    
+    if ~posPerfFlag
+        figure;
+        imagesc(confMat);
+        title('Confusion Matrix')
+        xlabel('Movements');
+        ylabel('Movements');
+    end
 end
