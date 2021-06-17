@@ -69,7 +69,7 @@ function sigFeatures = EstimatePosition(handles, sigFeatures)
     for iNb = 1:nSmp      % Number of samples
         for iMov = 1:nM
             %Quaternions
-%             allPos(iNb, iMov, :) = allFeatures(iNb, iMov).itmn_quat;
+            allPosQuat(iNb, iMov, :) = allFeatures(iNb, iMov).itmn_quat;
             % Euler
             allPosEuler(iNb, iMov, :) = quat2eul(allFeatures(iNb, iMov).itmn_quat); % XYZ rotation
             
@@ -92,6 +92,8 @@ function sigFeatures = EstimatePosition(handles, sigFeatures)
     sigFeatures.trPos = allPosIndex(1:sigFeatures.trSets, :);
     sigFeatures.vPos = allPosIndex(sigFeatures.trSets+1:sigFeatures.trSets+sigFeatures.vSets, :);
     sigFeatures.tPos = allPosIndex(sigFeatures.trSets+sigFeatures.vSets+1:end, :);
+    
+    sigFeatures.trQuat= allPosQuat(1:sigFeatures.trSets, :, :);
     
     
     %% Plot for testing
