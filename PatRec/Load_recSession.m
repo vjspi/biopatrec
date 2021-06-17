@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and 
-% Chalmers University of Technology. All authors’ contributions must be kept
+% Chalmers University of Technology. All authors? contributions must be kept
 % acknowledged below in the section "Updates % Contributors". 
 %
 % Would you like to contribute to science and sum efforts to improve 
-% amputees’ quality of life? Join this project! or, send your comments to:
+% amputees? quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file 
@@ -74,13 +74,28 @@ function Load_recSession(recSession, handles)
     if isfield(recSession,'vCh')
         handles.vCh = recSession.vCh;
     end
-
+    
     %set(stdata.t_path,'UserData',path);
     
     %Load the whole recSession
     set(stdata.t_recSession,'UserData',recSession);
     % Save this GUI handles
     set(stdata.t_mhandles,'UserData',handles);  
+    
+    
+    % Check if custom default settings should be used
+    if get(handles.cb_customDefault, 'Value')
+        eventdata = [];
+        stdata = CustomDefault(stdata, 'recSession');
+        GUI_SigTreatment('pb_preProcessing_Callback',st, eventdata, stdata);
+        disp('SigTreated generated with default settings');
+        
+        stdata = CustomDefault(stdata, 'sigTreated');
+        GUI_SigTreatment('pb_treat_Callback',st, eventdata, stdata);
+
+    end
+
+    
     
     
 
