@@ -18,18 +18,11 @@
 % -------------------------- Function Description -------------------------
 %
 % Compute the accuracy of the patRec algorithm for each position
-% As it is, the number of set per class must be the same for each class
 %
 % ------------------------- Updates & Contributors ------------------------
 % [Contributors are welcome to add their email]
-% 2011-10-29 / Max Ortiz  / Created 
-% 2012-03-04 / Max Ortiz  / Cleaned from old commented code and include a
-%                         validation for outMov == 0
-% 2012-04-01 / Max Ortiz  / Cunfusion matrix added to the calculations
-% 2012-04-01 / Max Ortiz  / tTime added
-% 2013-10-22 / Faezeh Rouhani  / Additional indicators
-%                               (precision,recall,f1,specificity,npv)
-% 2012-10-30 / Max Ortiz  / Clean and comment code, rename accnew to accTrue
+% 2021-06-15 / Veronika Spieker / Creation - Expands the Accuracy_patRec
+% function
 
 function [perfPos confMatPos tTimePos sMPos] = PositionPerformance_patRec(patRec, tSet, tOut, tPos, confMatFlag)
 
@@ -84,7 +77,7 @@ end
 
 
 for i=1:length(row)
-    disp(['No motion "',patRec.mov{row}, '" in position ', num2str(col)]);
+    disp(['No motion "',patRec.mov{row(i)}, '" in position ', num2str(col(i))]);
 end
 
 % 
