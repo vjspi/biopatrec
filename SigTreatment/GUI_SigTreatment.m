@@ -21,6 +21,8 @@
 % ------------------------- Updates & Contributors ------------------------
 % [Contributors are welcome to add their email]
 % 20xx-xx-xx / Max Ortiz  / Creation
+% 2021-18-06 / Veronika Spieker / Corrected calculation of tN (number of
+%                               training sets)
 % 20xx-xx-xx / Author  / Comment on update
 
 function varargout = GUI_SigTreatment(varargin)
@@ -201,7 +203,7 @@ function et_vP_Callback(hObject, eventdata, handles)
     vN = fix(vP * nw);
     set(handles.et_vN,'String',num2str(vN));
     tP = str2double(get(handles.et_tP,'String'));
-    tN = nw-(trN+pN);
+    tN = nw-(trN+vN);
     set(handles.et_tN,'String',num2str(tN));
 
     set(handles.t_totN,'String',num2str(trN+vN+tN));
@@ -232,7 +234,7 @@ function et_tP_Callback(hObject, eventdata, handles)
     vN = fix(vP * nw);
     set(handles.et_vN,'String',num2str(vN));
     tP = str2double(get(handles.et_tP,'String'));
-    tN = nw-(trN+pN);
+    tN = nw-(trN+vN);
     set(handles.et_tN,'String',num2str(tN));
 
     set(handles.t_totN,'String',num2str(trN+vN+tN));
