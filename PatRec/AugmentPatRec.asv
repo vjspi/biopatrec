@@ -41,8 +41,8 @@ nP = length(patRecCal.pos.idx);
 
 % alg = patRecCal.patRecTrained.algorithm;   
 idxAlg = get(handles.pm_SelectAlgorithm, 'Value');
-allAlg = get(handles.pm_SelectAlgorithm, 'String');
-alg = char(allAlg(idxAlg));
+alg = get
+alg = handles.
 tType = patRecCal.patRecTrained.training;
 
 if isfield(patRecCal,'algConf')
