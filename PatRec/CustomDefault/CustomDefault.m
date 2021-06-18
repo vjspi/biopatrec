@@ -33,9 +33,10 @@ addArtifact = 0; % None
 %....define further information
 
 %% SigTreated
-trP = 0.4;      
-vP = 0.2;
-tP = 0.4;       % Time window in s
+trP = 0.5;   
+vP = 0;
+tP = 0.5;      
+% Time window in s
 wOverlap = 0.05;      % Overlap in s
 
 posEstimation = '3 Positions';
@@ -65,7 +66,11 @@ if strcmp(dataset, 'sigTreated')
     trN = ceil(trP * nw);
     set(handles.et_trN,'String',num2str(trN));
     
-    vN = fix(vP * nw);
+    if vP ~= 0
+        vN = fix(vP * nw);
+    else 
+        vN = 1;         % Currently to allow further procesing (Change code in Accuracy_patRec to allow zero)
+    end
     set(handles.et_vN,'String',num2str(vN));
 
 %     tN = fix(tP * nw);
