@@ -26,7 +26,7 @@
 % [Contributors are welcome to add their email]
 % 2021-06-14 / Veronika Spieker
 
-function [accPos, idxAdapt] = PositionPerformance_Analysis(patRec, performancePos, confMatAll, confMatPos, confMatFlag)
+function [accPos, accTruePos, idxAdapt] = PositionPerformance_Analysis(patRec, performancePos, confMatAll, confMatPos, confMatFlag)
 
 accThreshold = 75;      % Threshold for position that needs to be adapted
 
@@ -61,12 +61,14 @@ end
 % Restructure position dependent accuracy
 for p = 1:length(performancePos)
     accPos(:,p) = performancePos{p}.acc;
+    accTruePos(:,p) =  performancePos{p}.accTrue;
 end
 
 f = figure;
-imagesc(accPos, [50 100]);
+imagesc(accPos, [0 100]);
 set(gca, 'XTick', 1:nPos); set(gca, 'XTickLabel', pos);
 set(gca, 'YTick', 1:(nM+1)); set(gca, 'YTickLabel', [patRec.mov; 'All']);
+% colormap winter;
 colorbar;
 hold on;
 [idxAdapt(:,2), idxAdapt(:,1)] = find(accPos < accThreshold);

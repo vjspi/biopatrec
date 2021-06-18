@@ -281,7 +281,7 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
     if posPerfFlag
         [performancePos confMatPos tTimePos sMPos] = PositionPerformance_patRec(patRec, tSets, tOuts, tPos, confMatFlag);
         
-        [accPos, idxAdapt] = PositionPerformance_Analysis(patRec, performancePos, confMatAll, confMatPos, confMatFlag);
+        [accPos, accTruePos, idxAdapt] = PositionPerformance_Analysis(patRec, performancePos, confMatAll, confMatPos, confMatFlag);
         patRec.idxAdapt = idxAdapt;
         % Save for later data augmentation
         patRec.trSets = trSets; 
