@@ -288,8 +288,12 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
         patRec.idxAdapt = idxAdapt;
         patRec.accThreshold = accThreshold;        
         % Save for later data augmentation
-        patRec.trSets = trSets; 
-        patRec.trOuts = trOuts;
+        patRec.Sets.trSets = trSets; 
+        patRec.Sets.trOuts = trOuts;
+        patRec.Sets.vSets = vSets; 
+        patRec.Sets.vOuts = vOuts;
+        patRec.Sets.tSets = tSets; 
+        patRec.Sets.tOuts = tOuts;
     end
 
 
