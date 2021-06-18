@@ -26,9 +26,7 @@
 % [Contributors are welcome to add their email]
 % 2021-06-14 / Veronika Spieker
 
-function [accPos, accTruePos, idxAdapt] = PositionPerformance_Analysis(patRec, performancePos, confMatAll, confMatPos, confMatFlag)
-
-accThreshold = 75;      % Threshold for position that needs to be adapted
+function [accPos, accTruePos, idxAdapt] = PositionPerformance_Analysis(patRec, performancePos, accThreshold, confMatAll, confMatPos, confMatFlag)
 
 nM      = size(patRec.mov,1);     
 pos = patRec.pos.idx;
