@@ -52,7 +52,7 @@ function patRec = OfflinePatRecTraining(alg, tType, algConf, trSets, trOuts, vSe
         patRec.thOut(1:size(trOuts,2)) = 0.5; 
         
     % DA    
-    elseif strcmp(alg,'Discriminant A.')            
+    elseif strcmp(alg,'Discriminant A.') ||  strcmp(alg,'DA')            
 
         [coeff accV] = DiscriminantAnalysis(tType, trSets, trOuts, vSets, vOuts, mov, movIdx);
         patRec.algorithm = 'DA';
