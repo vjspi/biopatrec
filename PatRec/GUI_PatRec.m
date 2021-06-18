@@ -438,9 +438,6 @@ function pb_RunOfflineTraining_Callback(hObject, eventdata, handles)
         algConf = [];
     end
     
-    %Adaptive Learner
-    % Expand the data set here!!!!!!!!! Then feed into Offline PatRec...
-
     %Select topology
     allTopologies = get(handles.pm_SelectTopology,'String');
     topology      = char(allTopologies(get(handles.pm_SelectTopology,'Value')));
