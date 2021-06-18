@@ -37,7 +37,7 @@
 
 % 20xx-xx-xx / Author  / Comment on update
 
-function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSetsType, alg, tType, algConf, movMix, topology, confMatFlag, featReducAlg)
+function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSetsType, alg, tType, algConf, movMix, topology, confMatFlag, featReducAlg, posPerfFlag)
 
     %% patRec structure initialization
 
@@ -80,6 +80,9 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
         patRec.comm = 'N/A';
     end
     
+    if isfield(sigFeatures, 'pos')
+        patRec.pos = sigFeatures.pos;
+    end
     
     %% Todo: Processing of position!!!!!!
     %%
@@ -271,36 +274,22 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
     
     %% Test accuracy of the patRec
 
-    [performance confMat tTime] = Accuracy_patRec(patRec, tSets, tOuts, confMatFlag);
+    [performance confMatAll tTime] = Accuracy_patRec(patRec, tSets, tOuts, confMatFlag, posPerfFlag);
     patRec.tTime = tTime;
     
     % Position specific performance (if selected)
     if posPerfFlag
         [performancePos confMatPos tTimePos sMPos] = PositionPerformance_patRec(patRec, tSets, tOuts, tPos, confMatFlag);
         
-        if confMatFlag
-            % Plot position dependent confusion matrices
-            figure;
-            tlo = tiledlayout(2,2);
-            for p = 1:length(performancePos)
-                h(p) = nexttile(tlo);
-                confMatPos{p}(isnan(confMatPos{p}))=0;  % Replace NaN values (due to division by zero if hand motion not present in one position)
-
-                imagesc(confMatPos{p});
-                title(['Position ', num2str(p)])
-                xlabel('Movements'); ylabel('Movements');
-                set(h, 'CLim', [0 1]);
-                colorbar;
-            end
-            h(p+1) = nexttile(tlo);
-            imagesc(confMat); 
-            title('All Positions');
-            set(h, 'CLim', [0 1]);
-            colorbar;
-        end
+        [accPos, idxAdapt] = PositionPerformance_Analysis(patRec, performancePos, confMatAll, confMatPos, confMatFlag);
+        patRec.idxAdapt = idxAdapt;
+        % Save for later data augmentation
+        patRec.trSets = trSets; 
+        patRec.trOuts = trOuts;
     end
-    
-    %% Test if performancePos is correct (backcalculation)
+
+
+%% Test if performancePos is correct (backcalculation)
 %     
 %     % get data from known function(s)
 %     [performance confMat tTime sM] = Accuracy_patRec(patRec, tSets, tOuts, confMatFlag); % ConfMatFlag = 0
@@ -341,13 +330,12 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
 %     if any(abs(accTest - performance.acc) >= 1e-10);
 %         disp('Backcalculated accuracy does not match - error in data set division by position.')
 %     end
-%         
-   
+
 
     %% Final data to the patRec
     patRec.tTime = tTime;
     patRec.performance  = performance;
-    patRec.confMat      = confMat;
+    patRec.confMat      = confMatAll;
     patRec.date         = fix(clock);
     patRec.indMovIdx    = movIdx;
     patRec.nOuts        = size(movIdx,2);
