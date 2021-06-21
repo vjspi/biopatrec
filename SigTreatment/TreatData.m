@@ -100,7 +100,7 @@ end
 set(handles.t_msg,'String','Segmenting data...');
 [trData, vData, tData] = GetData(sigTreated);
 
-if strcmp(sigTreated.dev, 'Thalmic MyoBand (IMU)')
+if isfield(sigTreated, 'multiModal')
     [trDataIMU, vDataIMU, tDataIMU] = GetDataIMU (sigTreated);
     %Remove raw treated IMU data
     sigTreated = rmfield(sigTreated,'trDataIMU');
@@ -136,7 +136,7 @@ sigTreated.trData = trData;
 sigTreated.vData = vData;
 sigTreated.tData = tData;
 
-if sigTreated.multiModal
+if isfield(sigTreated, 'multiModal')
     sigTreated.trDataIMU = trDataIMU;
     sigTreated.vDataIMU = vDataIMU;
     sigTreated.tDataIMU = tDataIMU;

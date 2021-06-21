@@ -35,6 +35,15 @@ function sigTreated = PreProcessing(handles)
     % Get the recSession
     set(handles.t_msg,'String','Loading recSession...');
     recSession = get(handles.t_recSession,'UserData');
+    
+    % Check if more than EMG data was recorded 
+    % (either by name or if data is in recSession)
+    if strcmp(recSession.dev, 'Thalmic MyoBand (IMU)') 
+        recSession.multiModal = true; 
+    end
+    if isfield(recSession, 'imudata')
+        recSession.multiModal = true; 
+    end
 
     %Remove movements if required %---------------------------------------
     movSel = get(handles.lb_movements,'Value');        
@@ -128,9 +137,9 @@ function sigTreated = PreProcessing(handles)
     end
     set(handles.cb_AddArtifact,'Enable','off');
     
-    % Check if more than EMG data was recorded
-    if strcmp(sigTreated.dev, 'Thalmic MyoBand (IMU)')
-        sigTreated.multiModal = true; 
+    %Transfer IMU information to new struct
+    if isfield(recSession, 'multiModal')
+        sigTreated.multiModal = true;
     end
     
     % Upload sigtreated to the GUI----------------------------------------

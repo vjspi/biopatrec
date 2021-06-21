@@ -544,7 +544,7 @@ function pb_preProcessing_Callback(hObject, eventdata, handles)
     set(handles.pb_treatFolder,'Enable','on');
     set(handles.pb_preview,'Enable','on');
     
-    if sigTreated.multiModal
+    if isfield(sigTreated, 'multiModal')
         set(handles.pm_posEstimation, 'Value', 2);
     end
     

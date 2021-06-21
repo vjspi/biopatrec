@@ -268,7 +268,7 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
     if strcmp(deviceName, 'Thalmic MyoBand (IMU)') 
         DataShowIMU(handles, cdata(:,1:handles.nCh), idata, sF, sT);
     else
-         DataShow(handles,cdata(:,1:handles.nCh),sF,sT);
+        DataShow(handles,cdata(:,1:handles.nCh),sF,sT);
     end
          
     

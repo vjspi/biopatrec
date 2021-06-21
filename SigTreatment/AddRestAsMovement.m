@@ -36,7 +36,7 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
     nM      = recSession.nM;
     tdata   = recSession.tdata;
     
-    if strcmp(recSession.dev, 'Thalmic MyoBand (IMU)')
+    if isfield(recSession, 'multiModal')
         imudata = recSession.imudata;
     end
     
@@ -45,7 +45,7 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
     for ex = 1 : nM
     tempdata =[];  
     
-    if strcmp(recSession.dev, 'Thalmic MyoBand (IMU)')
+    if isfield(recSession, 'multiModal')
         tempimu = [];
     end
     
@@ -57,12 +57,15 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
             fs = fix((sF*cT*rep) + (sF*rT*.75) + (sF*rT*(rep-1)));
             tempdata = [tempdata ; tdata(is:fs,:,ex)];
             
-            if strcmp(recSession.dev, 'Thalmic MyoBand (IMU)')
+            if isfield(recSession, 'multiModal')
                 tempimu = [tempimu ; imudata(is:fs,:,ex)];
             end
         end
         trData(:,:,ex) = tempdata;
-        trDataIMU(:,:,ex) = tempimu;
+        
+        if isfield(recSession, 'multiModal')
+            trDataIMU(:,:,ex) = tempimu; 
+        end
     end
     
     % Gather the required amount of data for a movement
@@ -78,13 +81,15 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
 %     end
     
     restData = [];
-    restDataIMU = [];
+    if isfield(recSession, 'multiModal')
+        restDataIMU = [];
+    end
     %Using the first samples of each movement
     is = 1;
     fs = sampXmov;
     for ex = 1 : nM
         restData = [restData ; trData(is:fs,:,ex)];   
-        if strcmp(recSession.dev, 'Thalmic MyoBand (IMU)')
+        if isfield(recSession, 'multiModal')
             restDataIMU = [restDataIMU ; trDataIMU(is:fs,:,ex)]; 
         end
     end
@@ -94,7 +99,9 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
     % the last rest period of the 1st movement
     if size(restData,1) ~= totSamp
         restData = [restData ; trData(end-sd+1:end,:,1)];
-        restDataIMU = [restDataIMU ; trDataIMU(end-sd+1:end,:,1)];
+        if isfield(recSession, 'multiModal')
+            restDataIMU = [restDataIMU ; trDataIMU(end-sd+1:end,:,1)];
+        end
     end
 
     %Random selection of the sets to be use
@@ -111,4 +118,6 @@ function sigTreated = AddRestAsMovement(sigTreated, recSession)
     sigTreated.nM = sigTreated.nM+1;
     sigTreated.mov(sigTreated.nM) = {'Rest'};
     sigTreated.trData(:,:,sigTreated.nM) = restData;
-    sigTreated.trDataIMU(:,:,sigTreated.nM) = restDataIMU;
+    if isfield(recSession, 'multiModal')
+        sigTreated.trDataIMU(:,:,sigTreated.nM) = restDataIMU;
+    end

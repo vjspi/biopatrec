@@ -68,7 +68,7 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
     if isfield(sigTreated,'dev')
         sigFeatures.dev     = sigTreated.dev;
         
-        if sigTreated.multiModal
+        if isfield(sigTreated, 'multiModal')
             sigFeatures.fID = LoadFeaturesIDs('featuresIMU.def');
             
         end
@@ -99,7 +99,7 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
     drawnow;
     for m = 1: nM
         for i = 1 : sigTreated.trSets
-            if sigTreated.multiModal
+            if isfield(sigTreated, 'multiModal')
                 trFeatures(i,m) = GetSigFeatures(sigTreated.trData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID, sigTreated.trDataIMU(:,:,m,i));
             else
                 trFeatures(i,m) = GetSigFeatures(sigTreated.trData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID);
@@ -111,7 +111,7 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
     drawnow;
     for m = 1: nM
         for i = 1 : sigTreated.vSets
-            if sigTreated.multiModal
+            if isfield(sigTreated, 'multiModal')
                 vFeatures(i,m) = GetSigFeatures(sigTreated.vData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID, sigTreated.vDataIMU(:,:,m,i));
             else
                 vFeatures(i,m) = GetSigFeatures(sigTreated.vData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID);
@@ -123,7 +123,7 @@ function sigFeatures = GetAllSigFeatures(handles, sigTreated)
     drawnow;
     for m = 1: nM
         for i = 1 : sigTreated.tSets
-            if sigTreated.multiModal
+            if isfield(sigTreated, 'multiModal')
                 tFeatures(i,m) = GetSigFeatures(sigTreated.tData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID, sigTreated.tDataIMU(:,:,m,i));
             else
                 tFeatures(i,m) = GetSigFeatures(sigTreated.tData(:,:,m,i),sigTreated.sF, sigTreated.fFilter, sigFeatures.fID);
