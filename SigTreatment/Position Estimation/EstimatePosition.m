@@ -24,14 +24,9 @@
 % 20xx-xx-xx / Author  / Comment on update
 
 % function [trDataPos, vDataPos, tDataPos] = EstimatePosition(sigTreated, trDataImu, vDataImu, tDataImu)
-function sigFeatures = EstimatePosition(handles, sigFeatures)
+function sigFeatures = EstimatePosition(posDef, sigFeatures)
 
 
-  %% Position Definition
-  posDefAll = get(handles.pm_posEstimation, 'String');
-  posDefSel = get(handles.pm_posEstimation, 'Value');
-  posDef = posDefAll{posDefSel};
-  
   if strcmp(posDef, '3 Positions')
       % identification of positions based on y orientation in Euler Angles
       % Reference position for Myo orientation:

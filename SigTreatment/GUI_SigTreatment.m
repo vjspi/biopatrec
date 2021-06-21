@@ -130,7 +130,11 @@ function pb_treat_Callback(hObject, eventdata, handles)
     if ~get(handles.pm_posEstimation,'Value') ~=1
 %         sigFeatures = EstimatePosition(handles, sigFeatures);   
         try
-            sigFeatures = EstimatePosition(handles, sigFeatures);    
+             %% Position Definition
+             posDefAll = get(handles.pm_posEstimation, 'String');
+             posDefSel = get(handles.pm_posEstimation, 'Value');
+             posDef = posDefAll{posDefSel};
+            sigFeatures = EstimatePosition(posDef, sigFeatures);    
         catch
             disp('No IMU features available for position estimation!')
         end 
