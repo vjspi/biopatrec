@@ -240,7 +240,7 @@ classdef MyoData < handle
     
     IMU_SAMPLE_TIME = 0.020 %  50Hz
     EMG_SAMPLE_TIME = 0.005 % 200Hz
-    EMG_SCALE       = 128
+    EMG_SCALE       = 1     % Was set to 128 - changed to ensure compatibility with BioPatRec
     
     NUM_INIT_SAMPLES = 4
   end
