@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and 
-% Chalmers University of Technology. All authors’ contributions must be kept
+% Chalmers University of Technology. All authors? contributions must be kept
 % acknowledged below in the section "Updates % Contributors". 
 %
 % Would you like to contribute to science and sum efforts to improve 
-% amputees’ quality of life? Join this project! or, send your comments to:
+% amputees? quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file 
@@ -30,12 +30,20 @@
 % 2013-10-22 / Faezeh Rouhani  / Additional indicators
 %                               (precision,recall,f1,specificity,npv)
 % 2012-10-30 / Max Ortiz  / Clean and comment code, rename accnew to accTrue
+% 2021-06-14 / Veronika Spieker  / Adjusted performance caluclation to be
+%                                  independent of sample size (including
 
-function [performance confMat tTime] = Accuracy_patRec(patRec, tSet, tOut, confMatFlag)
+function [performance, confMat, tTime, sM] = Accuracy_patRec(patRec, tSet, tOut, confMatFlag, posPerfFlag)
 
 % Init variables
 nM      = size(patRec.mov,1);       % Number of movements (total)
-sM      = size(tOut,1)/nM;          % Sets per movement
+
+ % Sets per movement
+sM      = zeros(nM,1);     
+for n = 1:nM
+    sM(n) = length(find(tOut(:,n) == 1));
+end
+
 good    = zeros(size(tSet,1),1);    % Keep track of the good prediction
 nOut    = size(tOut,2);             % Number of outputs
 confMat = zeros(nM,nOut+1);
@@ -54,8 +62,7 @@ for i = 1 : size(tSet,1)
     x = NormalizeSet(tSet(i,:), patRec);
     x = ApplyFeatureReduction(x, patRec);
     %% Classification
-    [outMov outVector] = OneShotPatRecClassifier(patRec, x);
-
+    [outMov outVector] = OneShotPatRecClassifier(patRec, x);    
     tTime(i) = toc(tStart);
     
     %% Count the number of correct predictions
@@ -72,6 +79,8 @@ for i = 1 : size(tSet,1)
             else
                 %stop for debuggin purposes
             end
+            
+            outVec(i, :) = outVector;
             
 %             %Evaluate a single movement only / not suitable for simult.
 %               if tOut(i,outMov) == 1      
@@ -91,7 +100,7 @@ for i = 1 : size(tSet,1)
     
     %Confusion Matrix
     if confMatFlag
-        expectedOutIdx = fix((i-1)/sM)+1;   % This will only work if there is an equal number of sets per class
+        expectedOutIdx = find(tOut(i,:)==1);
         confMat(expectedOutIdx,outMov) = confMat(expectedOutIdx,outMov) + 1;
     end    
 end
@@ -130,29 +139,32 @@ tNs=sum(sum(TN));
 fNs=sum(sum(FN));
 
 % Compute metrics per movement/class
-% This will only work if there are the same number of movements
 acc     = zeros(nM+1,1);
 tPvec   = zeros(nOut,nM);
 tNvec   = zeros(nOut,nM);
 fPvec   = zeros(nOut,nM);
 fNvec   = zeros(nOut,nM);
 
+idxM = [0; cumsum(sM)];
 for i = 1 : nM
-    s = 1+((i-1)*sM);
-    e = sM*i;
-    acc(i) = sum(good(s:e))/sM;
+    
+    s = idxM(i) + 1;
+    e = idxM(i+1);
+%     s = 1+((i-1)*sM);
+%     e = sM*i;
+    acc(i) = sum(good(s:e))/sM(i);
     tPvec(:,i)=sum(TP(s:e,:));
     tNvec(:,i)=sum(TN(s:e,:));
     fPvec(:,i)=sum(FP(s:e,:));
     fNvec(:,i)=sum(FN(s:e,:));
 
-    if tPvec(:,i) > sM
+    if tPvec(:,i) > sM(i)
         disp('Error on Ture Possitives');
     end        
-    if tNvec(:,i) > size(tSet,1)-sM
+    if tNvec(:,i) > size(tSet,1)-sM(i)
         disp('Error on Ture Negatives');
     end    
-    
+     
 end    
 acc(i+1) = sum(good) / size(tSet,1);
 tPvec = sum(tPvec)';
@@ -194,10 +206,17 @@ performance.npv = npv*100;
 
 % Print confusion matrix
 if confMatFlag
-    confMat = confMat ./ sM; % This will only work if there is an equal number of sets per class
-    figure;
-    imagesc(confMat);
-    title('Confusion Matrix')
-    xlabel('Movements');
-    ylabel('Movements');
+%     for k = 1:length(sM)
+%         confMat(k,:) = confMat(k,:) ./ sM(k);
+%     end
+    confMat = confMat ./ sM; 
+    confMat(isnan(confMat))=0;  % Replace NaN values (due to division by zero if hand motion not present in one position)
+    
+    if ~posPerfFlag
+        figure;
+        imagesc(confMat);
+        title('Confusion Matrix')
+        xlabel('Movements');
+        ylabel('Movements');
+    end
 end

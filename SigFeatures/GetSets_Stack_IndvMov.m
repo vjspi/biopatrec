@@ -37,6 +37,7 @@
 %
 % ------------- Updates -------------
 %  2011-10-03 / Max Ortiz / Created
+% 2021-06-11 / Veronika Spieker  / Adjust stacking of data if an unequal group size is used for training
 % 20xx-xx-xx / Author  / Comment on update
 
 function [trSet, trOut, vSet, vOut, tSet, tOut, movIdx, movOutIdx] = GetSets_Stack_IndvMov(sigFeatures, features)
@@ -63,6 +64,12 @@ nMi   = size(movIdx,2);           % Number of movements individuals
 nMm   = size(movIdxMix,2);        % Number of movements mixed
 
 trSets = sigFeatures.eTrSets;     % effective number of sets for trainning
+
+% Testing of adding single hand motions and more features
+% Additional feature for one movement leads to empty struct for others
+% sigFeatures.trFeatures(end+1,1) = sigFeatures.vFeatures(1,1);
+% sigFeatures.trFeatures(end+1,:) = sigFeatures.vFeatures(end,:);
+% trSets = sigFeatures.trSets+2;
 
 if isempty(sigFeatures.vFeatures)
     vSets = 0;
@@ -156,6 +163,15 @@ for j = 1 : nMm;
         
 end
 
+ %% Stack pos data as well
+ % How can uneven data amount be handled? Simply adding at the end?
+bEmptySamples = all(trSet == 0, 2);
+idxEmptySamples = find(bEmptySamples == 1);
+for i = 1:length(idxEmptySamples)
+ idxNew = idxEmptySamples(i)-i+1;
+ trSet(idxNew,:) = [];
+ trOut(idxNew,:) = [];
+end
 
 
 

@@ -37,7 +37,7 @@
 
 % 20xx-xx-xx / Author  / Comment on update
 
-function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSetsType, alg, tType, algConf, movMix, topology, confMatFlag, featReducAlg)
+function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSetsType, alg, tType, algConf, movMix, topology, confMatFlag, featReducAlg, posPerfFlag)
 
     %% patRec structure initialization
 
@@ -80,6 +80,13 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
         patRec.comm = 'N/A';
     end
     
+    if isfield(sigFeatures, 'pos')
+        patRec.pos = sigFeatures.pos;
+    end
+    
+    %% Todo: Processing of position!!!!!!
+    %%
+    
     % Ramp training data
     if isfield(sigFeatures,'ramp')
         patRec.control.rampTrainingData.ramp = sigFeatures.ramp;
@@ -91,6 +98,7 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
     %% Randomize data (if requested)
     if randFeatures
         sigFeatures = Rand_sigFeatures(sigFeatures);
+        % Add correct randomization of position as well
     end
     
      %% Get data sets
@@ -108,6 +116,26 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
         [trSets, trOuts, vSets, vOuts, tSets, tOuts, movIdx, movOutIdx] = GetSets_Stack_MixedOut(sigFeatures, selFeatures);
 
      end
+          
+     %% Stack pos data as well
+     % Only tested for individual movement
+     if posPerfFlag
+         tPos = reshape(sigFeatures.tPos,[],1);
+         % check size
+         if length(tPos) ~= length(tOuts)
+             disp('Error in positional data - mismatch of amount of features and positions')
+         end
+     end
+     
+     %%
+     % How can uneven data amount be handled? Simply adding at the end?
+%      bEmptySamples = all(trSets == 0, 2);
+%      idxEmptySamples = find(bEmptySamples == 1);
+%      for i = 1:length(idxEmptySamples)
+%          trSets(idxEmptySamples(i)-i+1,:) = [];
+%          trOuts(idxEmptySamples(i)-i+1,:) = [];
+%      end
+          
      patRec.movOutIdx = movOutIdx;
      movLables = sigFeatures.mov(movIdx);  
      
@@ -246,12 +274,76 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
     
     %% Test accuracy of the patRec
 
-    [performance confMat tTime] = Accuracy_patRec(patRec, tSets, tOuts, confMatFlag);
+    [performance confMatAll tTime] = Accuracy_patRec(patRec, tSets, tOuts, confMatFlag, posPerfFlag);
     patRec.tTime = tTime;
+    
+    % Position specific performance (if selected)
+    if posPerfFlag
+        
+        accThreshold = 75;      % Threshold for position that needs to be adapted
+        
+        [performancePos confMatPos tTimePos sMPos] = PositionPerformance_patRec(patRec, tSets, tOuts, tPos, confMatFlag);
+        
+        [accPos, accTruePos, idxAdapt] = PositionPerformance_Analysis(patRec, performancePos, accThreshold, confMatAll, confMatPos, confMatFlag);
+        patRec.idxAdapt = idxAdapt;
+        patRec.accThreshold = accThreshold;        
+        % Save for later data augmentation
+        patRec.Sets.trSets = trSets; 
+        patRec.Sets.trOuts = trOuts;
+        patRec.Sets.vSets = vSets; 
+        patRec.Sets.vOuts = vOuts;
+        patRec.Sets.tSets = tSets; 
+        patRec.Sets.tOuts = tOuts;
+    end
+
+
+%% Test if performancePos is correct (backcalculation)
+%     
+%     % get data from known function(s)
+%     [performance confMat tTime sM] = Accuracy_patRec(patRec, tSets, tOuts, confMatFlag); % ConfMatFlag = 0
+%     [performance2 confMat2 tTime2 sM] = Accuracy_patRec_unequalSampleSize(patRec, tSets, tOuts, confMatFlag);
+%     
+%     % Check SAMPLE SIZE
+%     if any(sum(sMPos,2) ~= sM);
+%         disp('Mismatch of summed samples over all positions and total sample size')
+%     end
+%     
+%     % Check CONF MATRIX (if position separation was correct)
+%     confMatTest = zeros(size(confMat));
+%     for j = 1:length(performancePos)
+%         confMatTest = confMatTest + confMatPos{j}.*sMPos(:,j);
+%     end
+% 
+%     if any(abs(confMatTest - confMat2.*sM) >= 1e-10);
+%         disp('Backcalculated confusion matrices do not match - error in data set division by position.')
+%     end
+%     
+%     % Check ACCURACY(if position separation was correct)
+%     accFrac = zeros(patRec.nM +1, length(performancePos));
+%     accTest = zeros(size(performance.acc));
+%     
+%     for j = 1:length(performancePos)
+%         % What fraction of each hand motion is represented in what position?
+%         accFrac(:,j) = [sMPos(:,j); sum(sMPos(:,j))]./[sum(sMPos,2);sum(sum(sMPos,2))];
+%         
+%         % NaN if no samples available in one position 
+%         % (division by sample size 0) -> Replace these values with 0
+%         idxNaN = isnan(performancePos{j}.acc);
+%         perfTemp = performancePos{j}.acc; perfTemp(idxNaN) = 0;
+%         
+%         accTest = accTest + perfTemp .*accFrac(:,j); 
+% %         accTest(isnan) = 0;
+%     end
+%     
+%     if any(abs(accTest - performance.acc) >= 1e-10);
+%         disp('Backcalculated accuracy does not match - error in data set division by position.')
+%     end
+
 
     %% Final data to the patRec
+    patRec.tTime = tTime;
     patRec.performance  = performance;
-    patRec.confMat      = confMat;
+    patRec.confMat      = confMatAll;
     patRec.date         = fix(clock);
     patRec.indMovIdx    = movIdx;
     patRec.nOuts        = size(movIdx,2);

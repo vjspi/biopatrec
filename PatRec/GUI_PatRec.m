@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and 
-% Chalmers University of Technology. All authors’ contributions must be kept
+% Chalmers University of Technology. All authors? contributions must be kept
 % acknowledged below in the section "Updates % Contributors". 
 %
 % Would you like to contribute to science and sum efforts to improve 
-% amputees’ quality of life? Join this project! or, send your comments to:
+% amputees? quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file 
@@ -53,7 +53,7 @@ function varargout = GUI_PatRec(varargin)
 
 % Edit the above text to modify the response to help GUI_PatRec
 
-% Last Modified by GUIDE v2.5 19-May-2017 16:56:56
+% Last Modified by GUIDE v2.5 18-Jun-2021 10:41:39
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -95,6 +95,10 @@ axis off
 % Choose default command line output for GUI_PatRec
 handles.output = hObject;
 
+% Disable position specific analysis (only available when position data is
+% loaded)
+set(handles.cb_posPerf, 'Value' , 0.0);
+
 % Update handles structure
 guidata(hObject, handles);
 
@@ -134,7 +138,7 @@ function pb_GetFeatures_Callback(hObject, eventdata, handles)
         if(strcmp(ext,'.mat'))
             load([path,file]);
             if (exist('recSession','var'))      % Send a recording session for data treatment
-
+                
                 Load_recSession(recSession, handles);
                 %Enable algorithm selection
                 set(handles.pm_SelectAlgorithm,'Enable','on');
@@ -142,7 +146,7 @@ function pb_GetFeatures_Callback(hObject, eventdata, handles)
                 set(handles.rb_top2,'Enable','on');
                 set(handles.rb_top3,'Enable','on');
                 set(handles.rb_top4,'Enable','on');
-                
+
                 set(handles.pm_normSets,'Enable','on'); 
                 set(handles.pm_SelectTopology,'Enable','on'); 
                 set(handles.pm_movMix,'Enable','on'); 
@@ -153,7 +157,7 @@ function pb_GetFeatures_Callback(hObject, eventdata, handles)
                 set(handles.et_trSets,'Enable','on');    
                 set(handles.pb_RealtimePatRecMov2Mov,'Enable','off');
                 set(handles.pb_RunOfflineTraining,'Enable','on');
-                
+
                 
             elseif (exist('recSessionFeatures','var'))         % Get sig_Features
                 Load_recSessionFeatures(recSessionFeatures, handles);            
@@ -343,6 +347,14 @@ function pb_GetFeatures_Callback(hObject, eventdata, handles)
             set(handles.rb_top4,'Enable','on'); 
         end
     end
+    
+    % Check if position specific classification can be enabled
+    sigFeatures = get(handles.t_sigFeatures,'UserData');
+    if isfield(sigFeatures, 'pos')
+        set(handles.cb_posPerf, 'Enable', 'on');
+        set(handles.cb_posPerf, 'Value', 1.0);
+    end    
+    
     guidata(hObject,handles);
     
     
@@ -357,6 +369,14 @@ function pb_RunOfflineTraining_Callback(hObject, eventdata, handles)
     set(handles.t_msg,'String','Offline PatRec Started...');
 %    set(handles.pb_RunOfflineTraining,'Enable','Off');    
     drawnow;
+    
+    % Delete previous data
+    if isfield(handles, 'patRec')
+        handles = rmfield(handles, 'patRec');
+    end
+    if isfield(handles, 'patRecAdapt')
+        handles = rmfield(handles, 'patRecAdapt');
+    end
 
     % Check that a topology has been selected
     if get(handles.pm_SelectTopology,'Value') == 1
@@ -399,6 +419,9 @@ function pb_RunOfflineTraining_Callback(hObject, eventdata, handles)
     %Confusion matrix
     confMatFlag = get(handles.cb_confMat,'Value');
     
+    %Position specific performance
+    posPerfFlag = get(handles.cb_posPerf,'Value');
+    
     % Signal features
     fIdx = get(handles.lb_features,'Value');
     features = get(handles.lb_features,'String');
@@ -414,13 +437,13 @@ function pb_RunOfflineTraining_Callback(hObject, eventdata, handles)
     else
         algConf = [];
     end
-
+    
     %Select topology
     allTopologies = get(handles.pm_SelectTopology,'String');
     topology      = char(allTopologies(get(handles.pm_SelectTopology,'Value')));
     
     % Call rutine for offline pat rec
-    patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets, alg, tType, algConf, movMix, topology, confMatFlag, featReducAlg);
+    patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets, alg, tType, algConf, movMix, topology, confMatFlag, featReducAlg, posPerfFlag);
         
     % Save and show results
     handles.patRec = patRec;
@@ -432,29 +455,35 @@ function pb_RunOfflineTraining_Callback(hObject, eventdata, handles)
 %     set(handles.lb_precision,'UserData',patRec.performance.precision);
 %     set(handles.lb_recall,'UserData',patRec.performance.recall);
 %     set(handles.lb_f1,'UserData',patRec.performance.f1);
-    set(handles.et_accuracy,'UserData',patRec);
+    set(handles.et_accuracy,'UserData',patRec);       % Save current patRec
     
-    % Update GUI
-    set(handles.et_accuracy,'String',num2str(patRec.performance.acc(end),'%.2f'));
-    set(handles.lb_accuracy,'String',num2str(patRec.performance.acc(1:end-1),'%.2f'));
-    set(handles.et_accTrue,'String',num2str(patRec.performance.accTrue(end),'%.2f'));
-    set(handles.lb_accTrue,'String',num2str(patRec.performance.accTrue(1:end-1),'%.2f'));
-    set(handles.et_precision,'String',num2str(patRec.performance.precision(end),'%.2f'));
-    set(handles.lb_precision,'String',num2str(patRec.performance.precision(1:end-1),'%.2f'));
-    set(handles.et_recall,'String',num2str(patRec.performance.recall(end),'%.2f'));
-    set(handles.lb_recall,'String',num2str(patRec.performance.recall(1:end-1),'%.2f'));
-    set(handles.et_f1,'String',num2str(patRec.performance.f1(end),'%.2f'));
-    set(handles.lb_f1,'String',num2str(patRec.performance.f1(1:end-1),'%.2f'));
-    set(handles.et_specificity,'String',num2str(patRec.performance.specificity(end),'%.2f'));
-    set(handles.lb_specificity,'String',num2str(patRec.performance.specificity(1:end-1),'%.2f'));
-    set(handles.et_npv,'String',num2str(patRec.performance.npv(end),'%.2f'));
-    set(handles.lb_npv,'String',num2str(patRec.performance.npv(1:end-1),'%.2f'));
     
-    set(handles.et_trTime,'String',num2str(patRec.trTime));
-    set(handles.et_tTime,'String',num2str(patRec.tTime));
-    set(handles.pb_RealtimePatRecMov2Mov,'Enable','on');   
-    set(handles.t_msg,'String','Off-line Training Completed');  
-    disp(patRec);
+    
+    if get(handles.cb_inclAugData, 'Value')
+        
+        % Enable data augmentation if position data available
+        pb_augmentData_Callback(hObject, eventdata, handles);
+        set(handles.t_msg,'String','Training adaptive learner');  
+
+        % Check which patRec should be displayed
+        if get(handles.rb_patRecStandard,'Value') == 1.0
+            rb_patRecStandard_Callback(hObject, eventdata, handles);
+        else
+            rb_patRecAdapt_Callback(hObject, eventdata, handles);
+        end
+
+    else
+        % Update GUI
+        updatePerfGUI(hObject, eventdata, handles)
+    end
+     
+    
+
+    if posPerfFlag
+        set(handles.pb_augmentData,'Enable','on');
+    end
+    
+%     disp(patRec);
 %    GUI_PatRec;
     
 
@@ -1142,6 +1171,8 @@ function m_Stats_Group_Callback(hObject, eventdata, handles)
         return;
     end
     
+    % Load further presettings (default)
+    
     nM   = size(get(handles.lb_movements,'String'),1);
     accCS       = zeros(nRep,nM+1,nS);  
     accTrue     = zeros(nRep,nM+1,nS);
@@ -1650,6 +1681,13 @@ function cb_confMat_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of cb_confMat
 
+% --- Executes on button press in cb_posPerf.
+function cb_posPerf_Callback(hObject, eventdata, handles)
+% hObject    handle to cb_posPerf (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of cb_posPerf
 
 
 function et_trTime_Callback(hObject, eventdata, handles)
@@ -2260,3 +2298,239 @@ function et_accTrue_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in pb_augmentData.
+function pb_augmentData_Callback(hObject, eventdata, handles)
+% hObject    handle to pb_augmentData (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Dialog box to open a file
+% [file, path] = uigetfile('*.mat', 'Get recording from familiarization phase to augment ');
+
+if isfield(handles, 't_recSessionAdapt')  % Send a recording session for data treatment
+    tDataFam = handles.t_recSessionAdapt.cdata;
+    imuDataFam = handles.t_recSessionAdapt.idata(:,1:4);    % ToDo: Mechanism to ensure same recording conditions?
+    set(handles.t_msg,'String','Additional data loaded');    
+else
+    disp('No second data set could be found in folder of calibration set');
+    errordlg('No augmentation data set provided','Error');              
+end  
+
+% Ensure that recording file is recorded in one take!
+[nSmp, nCh, nRec] = size(tDataFam);
+if nRec ~=1
+    disp('%%%%%%%%%%%% Augmented data needs to be recorded in one take %%%%%%%%%%%')
+    return;
+else
+    [patRecAdapt, handles] = AugmentPatRec(tDataFam, imuDataFam, handles);
+end
+%     tSet = SignalProcessing_RealtimePatRec(data, patRecCal); % As would be done in live recording
+
+handles.patRecAdapt = patRecAdapt;
+
+% Update handles structure
+guidata(hObject, handles);
+
+set(handles.t_msg,'String','Data augmented')
+
+
+% --- Executes during object creation, after setting all properties.
+function pb_augmentData_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pb_augmentData (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on button press in cb_inclAugData.
+function cb_inclAugData_Callback(hObject, eventdata, handles)
+% hObject    handle to cb_inclAugData (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of cb_inclAugData
+
+
+
+% --- Executes during object creation, after setting all properties.
+function cb_inclAugData_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to cb_inclAugData (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on button press in cb_customDefault.
+function cb_customDefault_Callback(hObject, eventdata, handles)
+% hObject    handle to cb_customDefault (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of cb_customDefault
+
+
+% --- Executes during object creation, after setting all properties.
+function cb_customDefault_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to cb_customDefault (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on button press in pb_adaptData.
+function pb_adaptData_Callback(hObject, eventdata, handles)
+% hObject    handle to pb_adaptData (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Use custom pipeline to process the recSession data (flag this procedure)
+set(handles.cb_customDefault, 'Value', 1.0);
+
+% Dialog box to open a file
+[file, path] = uigetfile({'*.mat';});
+
+if ~isequal(file, 0)
+        [pathstr,name,ext] = fileparts(file);
+
+         load([path,file]);
+         
+         if (exist('recSession','var'))      % Load basic recording session
+
+            Load_recSession(recSession, handles);
+            %Enable algorithm selection
+            set(handles.pm_SelectAlgorithm,'Enable','on');
+            set(handles.rb_all,'Enable','on');
+            set(handles.rb_top2,'Enable','on');
+            set(handles.rb_top3,'Enable','on');
+            set(handles.rb_top4,'Enable','on');
+
+            set(handles.pm_normSets,'Enable','on'); 
+            set(handles.pm_SelectTopology,'Enable','on'); 
+            set(handles.pm_movMix,'Enable','on'); 
+            set(handles.pm_normSets,'Enable','on');
+            set(handles.pm_FeatureReduction,'Enable','on');
+            set(handles.et_vSets,'Enable','on');
+            set(handles.et_tSets,'Enable','on');
+            set(handles.et_trSets,'Enable','on');    
+            set(handles.pb_RealtimePatRecMov2Mov,'Enable','off');
+            set(handles.pb_RunOfflineTraining,'Enable','on');
+         else
+            set(handles.t_msg,'Choose a folder with a valid recSession!')
+         end
+end
+
+% Search for second file (from familarization phase)
+fileFam = 'fastRec_famPhase';    % Naming convention!
+
+try
+    load([path, fileFam], 'cdata', 'idata');
+    handles.t_recSessionAdapt.cdata = cdata;
+    handles.t_recSessionAdapt.idata = idata;
+catch
+    set(handles.t_msg,'String','No second file found for adaptation');
+end
+   
+
+% Set the predefined selection to transform sigFeatures to patRec
+if get(handles.cb_customDefault, 'Value')
+    CustomDefault(handles, 'sigFeatures');
+end
+
+% Check if position specific classification can be enabled
+sigFeatures = get(handles.t_sigFeatures,'UserData');
+if isfield(sigFeatures, 'pos')
+    set(handles.cb_posPerf, 'Enable', 'on');
+    set(handles.cb_posPerf, 'Value', 1.0);
+end   
+
+% Update handles structure
+guidata(hObject, handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function pb_adaptData_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pb_adaptData (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes during object creation, after setting all properties.
+function bg_patRecSel_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to bg_patRecSel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on button press in rb_patRecAdapt.
+function rb_patRecAdapt_Callback(hObject, eventdata, handles)
+% hObject    handle to rb_patRecAdapt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% Hint: get(hObject,'Value') returns toggle state of rb_patRecAdapt
+
+if isfield(handles, 'patRecAdapt')
+    handles.patRec.patRecTrained = handles.patRecAdapt.patRecAug.patRecTrained_New;
+    handles.patRec.performance = handles.patRecAdapt.patRecAug.performance_New;
+else
+    set(handles.t_msg, 'String', 'No adapted patRec available');
+    set(handles.rb_patRecAdapt, 'Value', 0.0);
+    set(handles.rb_patRecStandard, 'Value', 1.0);
+%     rb_patRecStandard_Callback(hObject, eventdata, handles);
+end
+
+updatePerfGUI(hObject, eventdata, handles)
+% Check if not saveing patRecNEW completely in handles????????????????????
+
+
+% --- Executes during object creation, after setting all properties.
+function rb_patRecAdapt_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to rb_patRecAdapt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% --- Executes on button press in rb_patRecStandard.
+function rb_patRecStandard_Callback(hObject, eventdata, handles)
+% hObject    handle to rb_patRecStandard (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if isfield(handles, 'patRecAdapt')
+    handles.patRec.patRecTrained = handles.patRecAdapt.patRecAug.patRecTrained_Old;
+    handles.patRec.performance = handles.patRecAdapt.patRecAug.performance_Old;
+else 
+    % No change of data
+end
+
+updatePerfGUI(hObject, eventdata, handles)
+
+% Hint: get(hObject,'Value') returns toggle state of rb_patRecStandard
+
+
+% --- Executes during object creation, after setting all properties.
+function rb_patRecStandard_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to rb_patRecStandard (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+function  updatePerfGUI(hObject, eventdata, handles)
+
+    patRec = handles.patRec;
+    % Update GUI
+    set(handles.et_accuracy,'String',num2str(patRec.performance.acc(end),'%.2f'));
+    set(handles.lb_accuracy,'String',num2str(patRec.performance.acc(1:end-1),'%.2f'));
+    set(handles.et_accTrue,'String',num2str(patRec.performance.accTrue(end),'%.2f'));
+    set(handles.lb_accTrue,'String',num2str(patRec.performance.accTrue(1:end-1),'%.2f'));
+    set(handles.et_precision,'String',num2str(patRec.performance.precision(end),'%.2f'));
+    set(handles.lb_precision,'String',num2str(patRec.performance.precision(1:end-1),'%.2f'));
+    set(handles.et_recall,'String',num2str(patRec.performance.recall(end),'%.2f'));
+    set(handles.lb_recall,'String',num2str(patRec.performance.recall(1:end-1),'%.2f'));
+    set(handles.et_f1,'String',num2str(patRec.performance.f1(end),'%.2f'));
+    set(handles.lb_f1,'String',num2str(patRec.performance.f1(1:end-1),'%.2f'));
+    set(handles.et_specificity,'String',num2str(patRec.performance.specificity(end),'%.2f'));
+    set(handles.lb_specificity,'String',num2str(patRec.performance.specificity(1:end-1),'%.2f'));
+    set(handles.et_npv,'String',num2str(patRec.performance.npv(end),'%.2f'));
+    set(handles.lb_npv,'String',num2str(patRec.performance.npv(1:end-1),'%.2f'));
+    
+    set(handles.et_trTime,'String',num2str(patRec.trTime));
+    set(handles.et_tTime,'String',num2str(patRec.tTime));
+    set(handles.pb_RealtimePatRecMov2Mov,'Enable','on');   
+    set(handles.t_msg,'String','Off-line Training Completed');  
