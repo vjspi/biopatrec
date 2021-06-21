@@ -24,10 +24,18 @@
 % augmented classifier
 % 20xx-xx-xx / Author    / Comment on update
 
-function [patRec, handles] = AugmentPatRec(tDataNew, quatDataNew, handles)
+function [patRec, handles] = AugmentPatRec(tDataNew, quatDataNew, handles, varargin)
 
 % patRecCal is the initial model after calibraton, 
 % patRecAug is the model after additional data is fed
+if ~isempty(varargin)
+    alg = varargin{1};
+    addThreshold = varargin{2};                
+else 
+    % Default Settings
+    alg = 'Discriminant A.';
+    addThreshold = 1;
+end
 patRecCal = handles.patRec;   
 
 % Load stacked data (rather than sigFeatures -> this ensures that the same
@@ -40,9 +48,8 @@ nM = patRecCal.nM;
 nP = length(patRecCal.pos.idx);
 
 % alg = patRecCal.patRecTrained.algorithm;   
-idxAlg = get(handles.pm_SelectAlgorithm, 'Value');
-allAlg = get(handles.pm_SelectAlgorithm, 'String');
-alg = char(allAlg(idxAlg));
+% idxAlg = get(handles.pm_SelectAlgorithm, 'Value');
+% allAlg = get(handles.pm_SelectAlgorithm, 'String');
 tType = patRecCal.patRecTrained.training;
 
 if isfield(patRecCal,'algConf')
@@ -135,8 +142,6 @@ end
 %% Find desired data
 idxAdapt = patRecCal.idxAdapt;      % Desired augmentation
 idxFamPhase = [outPos, outMov];
-
-addThreshold = 1;                   %%%% Threshold?! %%%%%%%%%%%
 
 trFeatFam_Sel = [];
 trOutFam_Sel = [];
