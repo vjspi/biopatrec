@@ -129,7 +129,7 @@ function sigTreated = PreProcessing(handles)
     set(handles.cb_AddArtifact,'Enable','off');
     
     % Check if more than EMG data was recorded
-    if strcmp(sigTreated.dev, 'Myo_test')
+    if strcmp(sigTreated.dev, 'Thalmic MyoBand (IMU)')
         sigTreated.multiModal = true; 
     end
     

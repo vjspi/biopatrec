@@ -154,7 +154,7 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
             pause (0.5);
             s = MyoBandSession(sF, sT, sCh);
             cd (originFolder);
-        elseif strcmp(deviceName, 'Myo_test')
+        elseif strcmp(deviceName, 'Thalmic MyoBand (IMU)')
             %CK: init MyoBand
             originFolder = pwd;
             changeFolderToMyoMex();
@@ -219,14 +219,14 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
         if ~s.IsDone                                                   % check if is done
             s.wait();
         end
-        if ~strcmp(deviceName, 'Thalmic MyoBand') && ~strcmp(deviceName, 'Myo_test') 
+        if ~strcmp(deviceName, 'Thalmic MyoBand') && ~strcmp(deviceName, 'Thalmic MyoBand (IMU)') 
             delete(lh);
         end
         %CK: Stop sampling from MyoBand
         if strcmp(deviceName, 'Thalmic MyoBand') 
 %             s.stop(); 
             MyoClient('StopSampling');
-        elseif strcmp(deviceName, 'Myo_test') 
+        elseif strcmp(deviceName, 'Thalmic MyoBand (IMU)') 
             allData = s.emgData;
             imuData = s.imuData;
             imuTime = s.imuTime;
@@ -244,7 +244,7 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
 
     % Save Data
     recSessionData = allData;
-    if strcmp(deviceName, 'Myo_test')
+    if strcmp(deviceName, 'Thalmic MyoBand (IMU)')
         tic;
         recSessionIMU = interp1(imuTime, imuData, emgTime, 'linear', 'extrap');
         toc;
@@ -265,7 +265,7 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
     cdata = recSessionData;
     idata = recSessionIMU;
    
-    if strcmp(deviceName, 'Myo_test') 
+    if strcmp(deviceName, 'Thalmic MyoBand (IMU)') 
         DataShowIMU(handles, cdata(:,1:handles.nCh), idata, sF, sT);
     else
          DataShow(handles,cdata(:,1:handles.nCh),sF,sT);
@@ -290,7 +290,7 @@ function [cdata, sF, sT] = FastRecordingSession(varargin)
    
     [filename, pathname] = uiputfile({'*.mat','MAT-files (*.mat)'},'Save as', 'Untitled.mat');
     
-        if strcmp(deviceName, 'Myo_test')
+        if strcmp(deviceName, 'Thalmic MyoBand (IMU)')
             eul = quat2eul(idata(:,1:4));
             save([pathname,filename],'cdata','idata','eul','sF','sT','nCh','ComPortType','deviceName');
         end

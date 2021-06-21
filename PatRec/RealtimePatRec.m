@@ -174,7 +174,7 @@ function handlesX = RealtimePatRec(patRecX, handlesX)
 
         % Init SBI
         sCh = patRec.nCh;                                                  % Vector of channels
-        if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test') 
+        if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Thalmic MyoBand (IMU)') 
             %CK: init MyoBand
             s = MyoBandSession(sF, sT, sCh);
         else
@@ -191,11 +191,11 @@ function handlesX = RealtimePatRec(patRecX, handlesX)
         end
         
         
-        if ~strcmp(deviceName, 'Thalmic MyoBand')  && ~strcmp(deviceName, 'Myo_test') 
+        if ~strcmp(deviceName, 'Thalmic MyoBand')  && ~strcmp(deviceName, 'Thalmic MyoBand (IMU)') 
             delete(lh);
         end
         %CK: Stop sampling from MyoBand
-        if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test')
+        if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Thalmic MyoBand (IMU)')
             MyoClient('StopSampling');
         end
     %%%%% Real Time PatRec with other custom device %%%%%   

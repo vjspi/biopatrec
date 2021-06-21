@@ -305,7 +305,7 @@ function success = TACTest(patRecX, handlesX)
 
                     % Init SBI
                     sCh = 1:nCh;
-                    if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test')
+                    if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Thalmic MyoBand (IMU)')
                         %CK: init MyoBand
                         s = MyoBandSession(sF, sT, sCh);
                     else
@@ -321,11 +321,11 @@ function success = TACTest(patRecX, handlesX)
                         s.wait();
                     end
 %                     delete(lh);
-                    if ~strcmp(deviceName, 'Thalmic MyoBand') && ~strcmp(deviceName, 'Myo_test')
+                    if ~strcmp(deviceName, 'Thalmic MyoBand') && ~strcmp(deviceName, 'Thalmic MyoBand (IMU)')
                         delete(lh);
                     end
                     %CK: Stop sampling from MyoBand
-                    if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test')
+                    if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Thalmic MyoBand (IMU)')
                         MyoClient('StopSampling');
                     end
                     

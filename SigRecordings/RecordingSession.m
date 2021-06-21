@@ -368,7 +368,7 @@ while ex <= nM
             pause (0.5);
             s = MyoBandSession(sF, sTall, sCh);
             cd (originFolder);
-        elseif strcmp(deviceName, 'Myo_test')
+        elseif strcmp(deviceName, 'Thalmic MyoBand (IMU)')
             %VS: create MyoBand connection using MyoMex
             originFolder = pwd;
             changeFolderToMyoDLL();
@@ -531,13 +531,13 @@ while ex <= nM
         
         %CK: Since variable lh is not used in the MyoBandSession, we cannot
         %delete it this way. But for any other device lh will be deleted.
-        if ~strcmp(deviceName, 'Thalmic MyoBand') && ~strcmp(deviceName, 'Myo_test')
+        if ~strcmp(deviceName, 'Thalmic MyoBand') && ~strcmp(deviceName, 'Thalmic MyoBand (IMU)')
             delete(lh);
         end
         %CK: Stop sampling from MyoBand
         if strcmp(deviceName, 'Thalmic MyoBand') 
              MyoClient('StopSampling');
-        elseif strcmp(deviceName, 'Myo_test') 
+        elseif strcmp(deviceName, 'Thalmic MyoBand (IMU)') 
             delete(s.myMyoMex);       %deleting the MatMex object (opened in the beginning)
             s.stop();
             
@@ -560,14 +560,14 @@ while ex <= nM
     else
         
         % Interpolate IMU data if available
-        if strcmp(deviceName, 'Myo_test')
+        if strcmp(deviceName, 'Thalmic MyoBand (IMU)')
             tic;
             recSessionIMU(:,:,ex) = interp1(imuTime, imuData, emgTime, 'linear', 'extrap');
             toc;
         end
             
         % Plot movement just recorded
-         if strcmp(deviceName, 'Myo_test') 
+         if strcmp(deviceName, 'Thalmic MyoBand (IMU)') 
              DataShowIMU(handles, allData, recSessionIMU(:,:,ex), sF, sTall);
          else 
              DataShow(handles, allData, sF, sTall);
@@ -607,7 +607,7 @@ cdata = recSessionData(:,:,:);
 idata = recSessionIMU(:,:,:);
 
 
-if strcmp(deviceName, 'Myo_test')
+if strcmp(deviceName, 'Thalmic MyoBand (IMU)')
     %%resampleImuData
 end
 
@@ -654,7 +654,7 @@ if saveRec                                                             % Saved i
     else
         disp(['User selected ', fullfile(pathname, filename)])
         recSession.tdata = recSessionData;
-        if strcmp(deviceName, 'Myo_test')
+        if strcmp(deviceName, 'Thalmic MyoBand (IMU)')
             recSession.imudata = recSessionIMU;
             
             %Following only saves for last movement

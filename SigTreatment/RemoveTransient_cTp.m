@@ -68,7 +68,7 @@ function sigTreated = RemoveTransient_cTp(recSession, cTp)
             fs = fix((sF*cT*(cTp+eRed)) + (sF*cT*(rep-1)) + (sF*rT*(rep-1)));
             tempdata = [tempdata ; tdata(is:fs,:,ex)];
             
-            if strcmp(recSession.dev, 'Myo_test')
+            if strcmp(recSession.dev, 'Thalmic MyoBand (IMU)')
                 imudata = recSession.imudata;
                 tempimu = [tempimu ; imudata(is:fs,:,ex)];
             end
@@ -77,7 +77,7 @@ function sigTreated = RemoveTransient_cTp(recSession, cTp)
         end
         trData(:,:,ex) = tempdata;
         
-        if strcmp(recSession.dev, 'Myo_test')
+        if strcmp(recSession.dev, 'Thalmic MyoBand (IMU)')
             trDataIMU(:,:,ex) = tempimu;
         end
         

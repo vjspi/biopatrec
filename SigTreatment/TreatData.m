@@ -100,7 +100,7 @@ end
 set(handles.t_msg,'String','Segmenting data...');
 [trData, vData, tData] = GetData(sigTreated);
 
-if strcmp(sigTreated.dev, 'Myo_test')
+if strcmp(sigTreated.dev, 'Thalmic MyoBand (IMU)')
     [trDataIMU, vDataIMU, tDataIMU] = GetDataIMU (sigTreated);
     %Remove raw treated IMU data
     sigTreated = rmfield(sigTreated,'trDataIMU');

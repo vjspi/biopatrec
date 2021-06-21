@@ -461,7 +461,7 @@ contents = cellstr(get(handles.pm_name,'String'));
 deviceName = contents{get(handles.pm_name,'Value')};
 %CK: These are the default values for the MyoBand. Changing these might
 %lead to unwanted behaviour.
-if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Myo_test')
+if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Thalmic MyoBand (IMU)')
     set(handles.pm_sampleRate, 'Value', 9); %CK: The sample rate should be 200 Hz
     set(handles.ComPortType, 'Value', 1); %CK: I chose the NI ComPort because later in BPR it was easier to implement the MyoBand as an NI device, eventhough it isn't!
     set(handles.et_chs, 'String', '8');
@@ -479,7 +479,7 @@ function pm_name_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-deviceNames = {'Myo_test','AD2','AD3','MyoAmpF4F1','MyoAmpF4F2','MyoAmpF4F7','MyoAmpF4F7_Shielded','NeuroAmpF8F1','RHA2216','RHA2132','ADS1299','ADS_BP','Thalmic MyoBand'};
+deviceNames = {'Thalmic MyoBand (IMU)','AD2','AD3','MyoAmpF4F1','MyoAmpF4F2','MyoAmpF4F7','MyoAmpF4F7_Shielded','NeuroAmpF8F1','RHA2216','RHA2132','ADS1299','ADS_BP','Thalmic MyoBand'};
 set(hObject,'String',deviceNames);
 set(hObject,'Value',5);
 

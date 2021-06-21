@@ -78,7 +78,7 @@ function RecordingSession_ShowData(src, event)
         plotGain = 10000000;
     end
     
-    if ~strcmp(deviceName, 'Myo_test')
+    if ~strcmp(deviceName, 'Thalmic MyoBand (IMU)')
             tempData = event.Data;
             allData = [allData; tempData];
             timeStamps = [timeStamps; event.TimeStamps];
