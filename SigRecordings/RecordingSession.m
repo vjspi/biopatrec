@@ -257,10 +257,11 @@ drawnow update
     
 if strcmp(deviceName, 'Thalmic MyoBand (Quat incl. Real-time)') 
     nIMU = 4; % Only quaternions (would need to my changed MyBandSession File)
+    recSessionIMU = zeros(sF*sTall, nIMU, nM);  
 elseif strcmp(deviceName, 'Thalmic MyoBand (IMU)')
     nIMU = 7;
-end
-recSessionIMU = zeros(sF*sTall, nIMU, nM);       
+    recSessionIMU = zeros(sF*sTall, nIMU, nM);  
+end    
 
 
 %% Starting Session..
