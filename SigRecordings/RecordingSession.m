@@ -92,9 +92,11 @@ function [cdata, sF] = RecordingSession(varargin)
 
 global       handles;
 global       allData;
+global       allDataIMU;
 global       timeStamps;
 global       samplesCounter;
 allData      = [];
+allDataIMU   = [];
 nM           = varargin{1};
 nR           = varargin{2};
 cT           = varargin{3};
@@ -155,8 +157,10 @@ handles.sT    = sT;
 if strcmp(deviceName,'RHA2132')
     tW = 200/sF;
 else
-    tW = sT/100;
-end
+    tW = 0.05; % same as default in FastRecSession
+end 
+%     tW = sT/100;
+
 tWs           = tW*sF;                                                 % Time window samples
 handles.tWs   = tWs;
 timeStamps    = 0:1/sF:tW-1/sF;                                        % Create vector of time
@@ -247,11 +251,17 @@ handles.hPatch = patch(xpatch,ypatch,'b','EdgeColor','b','visible','on');
 drawnow update
 
 % Allocation of resource to improve speed, total data
-recSessionData = zeros(sF*sTall, nCh, nM);
+% recSessionData = zeros(sF*sTall, nCh, nM);
 
 % For IMU data acquisition
-nIMU = 10;
-recSessionIMU = zeros(sF*sTall, nIMU, nM);        
+    
+if strcmp(deviceName, 'Thalmic MyoBand (Quat incl. Real-time)') 
+    nIMU = 4; % Only quaternions (would need to my changed MyBandSession File)
+elseif strcmp(deviceName, 'Thalmic MyoBand (IMU)')
+    nIMU = 7;
+end
+recSessionIMU = zeros(sF*sTall, nIMU, nM);       
+
 
 %% Starting Session..
 
@@ -368,6 +378,17 @@ while ex <= nM
             pause (0.5);
             s = MyoBandSession(sF, sTall, sCh);
             cd (originFolder);
+            
+        elseif strcmp(deviceName, 'Thalmic MyoBand (Quat incl. Real-time)') 
+            originFolder = pwd;
+            changeFolderToMyoDLL();
+            pause (0.5);
+            s = MyoBandSessionIMU(sF, sTall, sCh);
+            cd (originFolder);
+            
+            % prepare IMU
+            imuData = zeros(sF*sT, nIMU);  % per each window sample 4 quaternions
+            
         elseif strcmp(deviceName, 'Thalmic MyoBand (IMU)')
             %VS: create MyoBand connection using MyoMex
             originFolder = pwd;
@@ -375,6 +396,9 @@ while ex <= nM
             pause (0.5);
              s = MyoBandSession_Mex(sF, sTall, sCh);
              cd (originFolder);
+             
+             % prepare IMU
+            imuData = zeros(sF*sT, nIMU);  % 7 values for 4 quaternions and 3 accelerometer
         else
             s = InitSBI_NI(sF,sTall,sCh);
         end
@@ -531,12 +555,15 @@ while ex <= nM
         
         %CK: Since variable lh is not used in the MyoBandSession, we cannot
         %delete it this way. But for any other device lh will be deleted.
-        if ~strcmp(deviceName, 'Thalmic MyoBand') && ~strcmp(deviceName, 'Thalmic MyoBand (IMU)')
+        if ~strcmp(deviceName, 'Thalmic MyoBand') && ~strcmp(deviceName, 'Thalmic MyoBand (IMU)') && ~strcmp(deviceName, 'Thalmic MyoBand (Quat incl. Real-time)')  
             delete(lh);
         end
         %CK: Stop sampling from MyoBand
         if strcmp(deviceName, 'Thalmic MyoBand') 
              MyoClient('StopSampling');
+             
+        elseif strcmp(deviceName, 'Thalmic MyoBand (Quat incl. Real-time)') 
+            MyoClient('StopSampling');
         elseif strcmp(deviceName, 'Thalmic MyoBand (IMU)') 
             delete(s.myMyoMex);       %deleting the MatMex object (opened in the beginning)
             s.stop();
@@ -562,16 +589,17 @@ while ex <= nM
         % Interpolate IMU data if available
         if strcmp(deviceName, 'Thalmic MyoBand (IMU)')
             tic;
-            recSessionIMU(:,:,ex) = interp1(imuTime, imuData, emgTime, 'linear', 'extrap');
+            allDataIMU = interp1(imuTime, imuData, emgTime, 'linear', 'extrap');
             toc;
         end
             
         % Plot movement just recorded
-         if strcmp(deviceName, 'Thalmic MyoBand (IMU)') 
-             DataShowIMU(handles, allData, recSessionIMU(:,:,ex), sF, sTall);
-         else 
-             DataShow(handles, allData, sF, sTall);
-         end
+        DataShowIMU(handles, allData, allDataIMU, sF, sTall); 
+%          if strcmp(deviceName, 'Thalmic MyoBand (IMU)') 
+%              DataShowIMU(handles, allData, recSessionIMU(:,:,ex), sF, sTall);
+%          else 
+%              DataShow(handles, allData, sF, sTall);
+%          end
          
         
         if movRepeatDlg
@@ -582,18 +610,21 @@ while ex <= nM
             answer = inputdlg(prompt,dlg_title,num_lines,def);
             if strcmp(answer, 'n')
                 % Save and go ahead with the next movement..
-                recSessionData(:,:,ex) = allData(:,:);           
+                recSessionData(:,:,ex) = allData(:,:);  
+                recSessionIMU(:,:,ex) = allDataIMU(:,:);  
                 % Increase loop index
                 ex = ex + 1;
             end
         else
             % Save and go ahead with the next movement..
             recSessionData(:,:,ex) = allData(:,:);      % Save each motion into with new index (in 3rd dimesion)
+                recSessionIMU(:,:,ex) = allDataIMU(:,:);  
             % Increase loop index
             ex = ex + 1;
         end
         % Clean global data
         allData = [];
+        allDataIMU = [];
         imuData = [];
     end
     
@@ -654,16 +685,21 @@ if saveRec                                                             % Saved i
     else
         disp(['User selected ', fullfile(pathname, filename)])
         recSession.tdata = recSessionData;
-        if strcmp(deviceName, 'Thalmic MyoBand (IMU)')
+        
+        if ~isempty(find(recSessionIMU,1))             % Check if values have been filled
             recSession.imudata = recSessionIMU;
-            
-            %Following only saves for last movement
-%             recSession.emgTime = emgTime;
-%             recSession.imuTime = imuTime;
-%             recSession.imuDataOrig = imuData;
-%             % Resample IMU data to EMG time vector
-%             recSession.imuData = interp1(imuTime, imuData, emgTime, 'linear', 'extrap');
         end
+        
+%         if strcmp(deviceName, 'Thalmic MyoBand (IMU)')
+%             recSession.imudata = recSessionIMU;
+%             
+%             %Following only saves for last movement
+% %             recSession.emgTime = emgTime;
+% %             recSession.imuTime = imuTime;
+% %             recSession.imuDataOrig = imuData;
+% %             % Resample IMU data to EMG time vector
+% %             recSession.imuData = interp1(imuTime, imuData, emgTime, 'linear', 'extrap');
+%         end
         
         save([pathname,filename],'recSession');
         disp(recSession);

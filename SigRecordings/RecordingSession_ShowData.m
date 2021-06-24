@@ -51,6 +51,10 @@ function RecordingSession_ShowData(src, event)
     global      offsetDelete;
     global      plotGain;
     
+    if isfield(event, 'IMU')
+        global  allDataIMU;
+    end
+    
     % Get required info from handles
     sF              = handles.sF;
     nCh             = handles.nCh;
@@ -84,12 +88,16 @@ function RecordingSession_ShowData(src, event)
             timeStamps = [timeStamps; event.TimeStamps];
     else
         tempData = event.Data;
+        allData = [allData; tempData];
         timeStamps = event.TimeStamps;
     end
     
+    if isfield(event, 'IMU')
+        tempIMU = event.IMU;
+        allDataIMU = [allDataIMU; tempIMU];
+    end
         
 
-   
     
     %% Status bar update
     if handles.fast 
