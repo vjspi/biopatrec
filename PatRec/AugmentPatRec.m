@@ -74,7 +74,7 @@ else
 end
 
 trSetsFam = zeros(tWsamples, nCh, nW);  %Initialize number of training matrices
-trFeatFam = zeros(nW, nCh*length(patRecCal.selFeatures));
+% trFeatFam = zeros(nW, nCh*length(patRecCal.selFeatures));     % Undefined because IMU and EMG features vary in length
 
 imuSetsAug = zeros(tWsamples, nImu, nW);
 trImuFam = zeros(nW, nImu);
@@ -83,8 +83,9 @@ trImuFam = zeros(nW, nImu);
 for i = 1 : nW
     iidx = 1 + (oS * (i-1));
     eidx = tWsamples + (oS *(i-1));
-    trSetsFam(:,:,i) = tDataNew(iidx:eidx,:);                                        % Raw data
-    trFeatFam(i,:) = SignalProcessing_RealtimePatRec(trSetsFam(:,:,i), patRecCal);  % Processed and features extracted
+    trSetsFam(:,:,i) = tDataNew(iidx:eidx,:);           % Raw data
+    iSetsFam(:,:,i) = quatDataNew(iidx:eidx,:);         % Raw data of IMU
+    trFeatFam(i,:) = SignalProcessing_RealtimePatRec(trSetsFam(:,:,i), patRecCal, iSetsFam(:,:,i));  % Processed and features extracted
     
     imuSetsAug(:,:,i) = quatDataNew(iidx:eidx,:); 
     % Direct processing -> how to combine with selection? Currently no
