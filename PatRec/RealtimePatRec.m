@@ -174,9 +174,13 @@ function handlesX = RealtimePatRec(patRecX, handlesX)
 
         % Init SBI
         sCh = patRec.nCh;                                                  % Vector of channels
-        if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Thalmic MyoBand (IMU)') 
+        if strcmp(deviceName, 'Thalmic MyoBand')
             %CK: init MyoBand
             s = MyoBandSession(sF, sT, sCh);
+        elseif strcmp(deviceName, 'Thalmic MyoBand (Quat incl. Real-time)') 
+             s = MyoBandSessionIMU(sF, sT, sCh);
+        elseif strcmp(deviceName, 'Thalmic MyoBand (IMU)') 
+             s = MyoBandSession_Mex(sF, sT, sCh);
         else
             s = InitSBI_NI(sF,sT,sCh); 
         end 
@@ -186,17 +190,22 @@ function handlesX = RealtimePatRec(patRecX, handlesX)
         % Start DAQ
         s.startBackground();                                               % Run in the backgroud
 
+        pause(iW);
+        pause on;
+        
         if ~s.IsDone                                                       % check if is done
             s.wait();
         end
-        
-        
-        if ~strcmp(deviceName, 'Thalmic MyoBand')  && ~strcmp(deviceName, 'Thalmic MyoBand (IMU)') 
+
+        if ~strcmp(deviceName, 'Thalmic MyoBand')  && ~strcmp(deviceName, 'Thalmic MyoBand (IMU)') && ~strcmp(deviceName, 'Thalmic MyoBand (Quat incl. Real-time)') 
             delete(lh);
         end
         %CK: Stop sampling from MyoBand
-        if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Thalmic MyoBand (IMU)')
+        if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Thalmic MyoBand (Quat incl. Real-time)') 
             MyoClient('StopSampling');
+        elseif strcmp(deviceName, 'Thalmic MyoBand (IMU)')
+            delete(s.myMyoMex);       %deleting the MatMex object (opened in the beginning)
+            s.stop();
         end
     %%%%% Real Time PatRec with other custom device %%%%%   
     else
@@ -283,12 +292,16 @@ function RealtimePatRec_OneShot(src,event)
     global pwmAs;
     global pwmBs;    
     global tempData;
+    global tempDataIMU;
     global outVectorMotorLast;
     global currentDegPerMovLast; 
 	global thresholdGUIData;
 
     %Keep saving all recorded data
     tempData = [tempData; event.Data];
+    if isfield(event, 'IMU')
+        tempDataIMU = [tempDataIMU; event.IMU];
+    end
     
     %Output vector
     outVectorMotor = zeros(patRec.nOuts,1);
@@ -304,12 +317,19 @@ function RealtimePatRec_OneShot(src,event)
         else % Copy the temporal data to the test data
             tData = tempData(end-patRec.sF*patRec.tW+1:end,:);   
         end
+        
+
 
         % Start of processing time
         procTimeS = tic;
 
         % General routine for RealtimePatRec
-        [outMov outVector patRec handles] = OneShotRealtimePatRec(tData, patRec, handles, thresholdGUIData);
+        if isfield(event, 'IMU')
+            idata = tempDataIMU(end-patRec.sF*patRec.tW+1:end,:); 
+            [outMov outVector patRec handles] = OneShotRealtimePatRec(tData, patRec, handles, thresholdGUIData, idata);
+        else
+            [outMov outVector patRec handles] = OneShotRealtimePatRec(tData, patRec, handles, thresholdGUIData, []);
+        end
         
         % GUI and control Updates
         
