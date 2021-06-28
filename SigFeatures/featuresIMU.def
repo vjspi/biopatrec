@@ -17,8 +17,6 @@ fwl	% Freq: wave length
 fmn	% Freq: mean
 fmd	% Freq: median
 itmn_quat % Time: Mean value for IMU quaternions
-itmn_acc % Time: Mean value for IMU acceleration
-itmn_gyr % Time: Mean value for IMU gyroscope
 
 
 

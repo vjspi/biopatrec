@@ -99,13 +99,18 @@ function DataShowIMU(handles,cdata, idata, sF, sT)
     
     piVector  = -pi:pi/2:pi;
     piName = {'-\pi','-0.5\pi','0','0.5\pi','\pi'};
-    eul = quat2eul(idata(:,1:4));
-    axes(handles.a_i0);
-    plot(tt(1:length(eul(:,1))),eul(:,1:3));
-    set(handles.a_i0,'YTick',piVector);
-    set(handles.a_i0,'YTickLabel',piName);
-    ylim(handles.a_i0, [-pi pi]);
-    xlim(handles.a_i0, [0 xmax]);
-    legend(handles.a_i0, 'x', 'y', 'z');
+    if ~isempty(idata)
+        eul = quat2eul(idata(:,1:4));
+        axes(handles.a_i0);
+%         plot(tt(1:length(eul(:,1))),idata(:,1:4));
+        plot(tt(1:length(eul(:,1))),eul(:,1:3));
+        set(handles.a_i0,'YTick',piVector);
+        set(handles.a_i0,'YTickLabel',piName);
+        ylim(handles.a_i0, [-pi pi]);
+        xlim(handles.a_i0, [0 xmax]);
+        legend(handles.a_i0, 'x', 'y', 'z');
+    else
+        % do nothing
+    end
        
 end

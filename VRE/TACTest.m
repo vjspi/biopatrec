@@ -308,6 +308,9 @@ function success = TACTest(patRecX, handlesX)
                     if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Thalmic MyoBand (IMU)')
                         %CK: init MyoBand
                         s = MyoBandSession(sF, sT, sCh);
+                    elseif strcmp(deviceName, 'Thalmic MyoBand (Quat incl. Real-time)')
+                        %CK: init MyoBand
+                        s = MyoBandSessionIMU(sF, sT, sCh);
                     else
                         s = InitSBI_NI(sF,sT,sCh);
                     end
@@ -321,11 +324,11 @@ function success = TACTest(patRecX, handlesX)
                         s.wait();
                     end
 %                     delete(lh);
-                    if ~strcmp(deviceName, 'Thalmic MyoBand') && ~strcmp(deviceName, 'Thalmic MyoBand (IMU)')
+                    if ~strcmp(deviceName, 'Thalmic MyoBand') && ~strcmp(deviceName, 'Thalmic MyoBand (IMU)') && ~strcmp(deviceName, 'Thalmic MyoBand (Quat incl. Real-time)')
                         delete(lh);
                     end
                     %CK: Stop sampling from MyoBand
-                    if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Thalmic MyoBand (IMU)')
+                    if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Thalmic MyoBand (IMU)') || strcmp(deviceName, 'Thalmic MyoBand (Quat incl. Real-time)')
                         MyoClient('StopSampling');
                     end
                     
@@ -429,6 +432,7 @@ function TACTest_OneShot(src,event)
     global fpTW;    % First time window with any movement.
     global dataTW;  % Raw data from each time windows
     global tempData;
+    global tempDataIMU;
     %global speed;
     global time;
 
@@ -450,6 +454,9 @@ function TACTest_OneShot(src,event)
     global nOvershoot
 
     tempData = [tempData; event.Data];
+    if isfield(event, 'IMU')
+        tempDataIMU = [tempDataIMU; event.IMU];
+    end
 
     if size(tempData,1) >= (patRec.sF * patRec.tW)
         tData = tempData(end-patRec.sF*patRec.tW+1:end,:);  %Copy the temporal data to the test data
@@ -458,8 +465,15 @@ function TACTest_OneShot(src,event)
         %Start counting processing time
         processingTimeTic = tic;
 
+        
         % General routine for RealtimePatRec
-        [outMov, outVector, patRec, handles.patRecHandles] = OneShotRealtimePatRec(tData, patRec, handles.patRecHandles, thresholdGUIData);
+        if isfield(event, 'IMU')
+            idata = tempDataIMU(end-patRec.sF*patRec.tW+1:end,:); 
+            [outMov outVector patRec handles.patRecHandles] = OneShotRealtimePatRec(tData, patRec, handles.patRecHandles, thresholdGUIData, idata);
+        else
+            [outMov outVector patRec handles.patRecHandles] = OneShotRealtimePatRec(tData, patRec, handles.patRecHandles, thresholdGUIData, []);
+        end
+        
         TrackStateSpace('move',outMov, patRec.control.currentDegPerMov);
         CurrentPosition('move',outMov, patRec.control.currentDegPerMov);
 
