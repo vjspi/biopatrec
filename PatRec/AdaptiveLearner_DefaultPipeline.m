@@ -227,9 +227,55 @@ algConf = [];
 featReducAlg = 'Select Reduc./Selec.';
 %Adaptive Learning parameters
 sigFeatures.accThreshold = 75;
+%% Train model for defined repetitions
+nRep = 3;
+kFoldStat.kFold = nRep;
+kFoldStat.pTrain = trP; kFoldStat.nTrain = trN;
+kFoldStat.pVal = vP; kFoldStat.nVal = vN;
+kFoldStat.pTest = tP; kFoldStat.nTest = tN;
 
-patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets, alg, tType, algConf, movMix, topology, confMatFlag, featReducAlg, posPerfFlag);
-handles.patRec = patRec;
+% Init variables
+kFoldStat.accCS       = zeros(nRep,nM+1);
+kFoldStat.accTrue     = zeros(nRep,nM+1);
+kFoldStat.precision   = zeros(nRep,nM+1);
+kFoldStat.recall      = zeros(nRep,nM+1);
+kFoldStat.f1          = zeros(nRep,nM+1);
+kFoldStat.specificity = zeros(nRep,nM+1);
+kFoldStat.npv         = zeros(nRep,nM+1);
+kFoldStat.trTime = zeros(1,nRep);
+kFoldStat.tTime = zeros(1,nRep);   
+
+tAcc = 0;       % Initialize as zero to compare best performance in loop
+tStd = inf;     % Required if deviation of class results is important as well
+    
+for i = 1 : nRep
+
+    patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets, alg, tType, algConf, movMix, topology, confMatFlag, featReducAlg, posPerfFlag);
+    tempPerformance = patRec.performance;
+
+    kFoldStat.accCS(i,:)      = tempPerformance.acc;
+    kFoldStat.accTrue(i,:)    = tempPerformance.accTrue;
+    kFoldStat.precision(i,:)  = tempPerformance.precision;
+    kFoldStat.recall(i,:)     = tempPerformance.recall;
+    kFoldStat.f1(i,:)         = tempPerformance.f1;
+    kFoldStat.specificity(i,:)= tempPerformance.specificity;
+    kFoldStat.npv(i,:)        = tempPerformance.npv;   
+    kFoldStat.trTime(i)       = patRec.trTime;
+    kFoldStat.tTime(i)        = patRec.tTime;
+    
+    % Save the best patRec
+%   if std(tempAcc(1:end-1)) <= tStd && tempAcc(end) >= tAcc
+    if tempPerformance.acc(end) >= tAcc
+%            tStd = std(tempAcc(1:end-1));
+        tAcc = tempPerformance.acc(end);
+        bestPatRec = patRec;
+        kFoldStat.bestTrial = i;
+    end
+    
+end
+
+% patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets, alg, tType, algConf, movMix, topology, confMatFlag, featReducAlg, posPerfFlag);
+handles.patRec = bestPatRec;
 
 %% Augment
 load([path,'\',fileAdapt]);
@@ -238,11 +284,11 @@ imuDataFam = idata(:,1:4);
 addThreshold = 1;
 [patRec, handles] = AugmentPatRec(tDataFam, imuDataFam, handles, alg, addThreshold);
 
-%k-fold?
 
 handles.patRec = patRec; % Update
 
-save([path, '\', file, '_patRec'], 'patRec');
+save([path, '\', file, '_patRec'], 'patRec', 'kFoldStat');
+
 
 Load_patRec(handles.patRec, 'GUI_TestPatRec_Mov2Mov',1);
 % set(button, 'String', 'Train Individual Mov)');
