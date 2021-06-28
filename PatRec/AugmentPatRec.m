@@ -134,6 +134,7 @@ for i = 1:nW
     outPos(i,1)     = OneShotPositionEstimation(patRecCal.pos,trImuFam(i,:));
 end
 
+
 % Plot to test feasibility
 % h = figure;
 % hold on;
@@ -146,25 +147,40 @@ idxFamPhase = [outPos, outMov];
 
 trFeatFam_Sel = [];
 trOutFam_Sel = [];
-nSAdd = zeros(nP,nM);% Number of samples that are going to be added for training
 
-for j = 1:length(idxAdapt)
-    ind{j,1} = find(ismember(idxFamPhase,idxAdapt(j,:),'rows'));
-    
-    if length(ind{j}) >= addThreshold;
-        nSAdd(idxAdapt(j,1), idxAdapt(j,2)) = length(ind{j});
-        trFeatFam_Sel = [trFeatFam_Sel; trFeatFam(ind{j},:)];       % Selected feature vector
-        
-        tempOut = outMov(ind{j});
-        tempOutMask = zeros(length(tempOut),nM);
-        for k = 1:length(tempOut) 
-            tempOutMask(k, tempOut(k)) = 1; 
-        end 
-        trOutFam_Sel = [trOutFam_Sel; tempOutMask];                 % Selected out vector
+% Total number of samples available from data set
+nSTot = zeros(nP,nM);   
+for k = 1:length(idxFamPhase)
+    if ~isnan(idxFamPhase(k,1))         %% Check in case there was a lack in IMU recording and therefore no pos data is available
+       nSTot(idxFamPhase(k,1),idxFamPhase(k,2)) = nSTot(idxFamPhase(k,1),idxFamPhase(k,2)) + 1;
     end
-        
 end
 
+% Number of samples that are going to be added for training
+nSAdd = zeros(nP,nM);  
+
+if ~isempty(idxAdapt)
+    
+    for j = 1:size(idxAdapt,1)
+
+        ind{j,1} = find(ismember(idxFamPhase,idxAdapt(j,:),'rows'));
+
+        if length(ind{j}) >= addThreshold;
+            nSAdd(idxAdapt(j,1), idxAdapt(j,2)) = length(ind{j});
+            trFeatFam_Sel = [trFeatFam_Sel; trFeatFam(ind{j},:)];       % Selected feature vector
+
+            tempOut = outMov(ind{j});
+            tempOutMask = zeros(length(tempOut),nM);
+            for k = 1:length(tempOut) 
+                tempOutMask(k, tempOut(k)) = 1; 
+            end 
+            trOutFam_Sel = [trOutFam_Sel; tempOutMask];                 % Selected out vector
+        end
+
+    end
+else
+    disp('NO DATA ADAPTATION!')
+end
 %% Expand data set
 trSetsAug = [trSets; trFeatFam_Sel];
 trOutsAug = [trOuts; trOutFam_Sel];
@@ -194,6 +210,7 @@ patRec.patRecAug.performance_Old = patRecCal.performance;
 patRec.patRecAug.patRecTrained_New= patRecTrained_New;
 patRec.patRecAug.performance_New = performance_New;
 
+patRec.patRecAug.nSTot = nSTot;
 patRec.patRecAug.nSAdd = nSAdd;
 patRec.patRecAug.addThreshold = addThreshold;
 patRec.patRecAug.accThreshold = patRecCal.accThreshold;  %%%%%%%%%%%%%% Adjust!
