@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and 
-% Chalmers University of Technology. All authors’ contributions must be kept
+% Chalmers University of Technology. All authors? contributions must be kept
 % acknowledged below in the section "Updates % Contributors". 
 %
 % Would you like to contribute to science and sum efforts to improve 
-% amputees’ quality of life? Join this project! or, send your comments to:
+% amputees? quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file 
@@ -32,8 +32,11 @@
 %                                TacTest and RealTimePatRec
 % 2018-02-24 / Adam Naber      / Fixed bugs in loading PatRec, 
                                % SigFeatures, and SigRecordings
+% 2021-06-28 / Veronika Spieker / Added optional output to be able to
+%                                 reference to the figure
+                               
 
-function Load_patRec(patRec, newGUI, loadMovements)
+function varargout = Load_patRec(patRec, newGUI, loadMovements)
 
     % To make sure old patRecs still can be used, initialize max / current
     % speeds
@@ -154,5 +157,7 @@ function Load_patRec(patRec, newGUI, loadMovements)
     % Save the patRec in the handles
     newHandles.patRec = patRec;
     guidata(nG,newHandles);
+    
+    varargout{1} = nG;
     
    
