@@ -179,8 +179,26 @@ if ~isempty(idxAdapt)
 
     end
 else
-    disp('NO DATA ADAPTATION!')
+    disp('### NO DATA ADAPTATION (no underrepresented samples) ! ###')
 end
+
+% Check if any data has been added
+if ~any(nSAdd, 'all')
+    disp('### NO DATA ADAPTATION (no data for underrepresented samples available) ! ###')
+end
+
+nSAddAll = nSAdd';
+nSAddAll(end+1,:) = sum(nSAddAll,1);
+
+% Plot added features
+f = figure;
+title('Number of Added Samples');
+imagesc(nSAddAll, [0 100]);
+set(gca, 'XTick', 1:nP); set(gca, 'XTickLabel', 1:nP);
+set(gca, 'YTick', 1:(nM+1)); set(gca, 'YTickLabel', [patRecCal.mov; 'All']);
+% colormap winter;
+colorbar;
+
 %% Expand data set
 trSetsAug = [trSets; trFeatFam_Sel];
 trOutsAug = [trOuts; trOutFam_Sel];
@@ -212,6 +230,7 @@ patRec.patRecAug.performance_New = performance_New;
 
 patRec.patRecAug.nSTot = nSTot;
 patRec.patRecAug.nSAdd = nSAdd;
+patRec.patRecAug.nSAddAll = nSAddAll;
 patRec.patRecAug.addThreshold = addThreshold;
 patRec.patRecAug.accThreshold = patRecCal.accThreshold;  %%%%%%%%%%%%%% Adjust!
     
