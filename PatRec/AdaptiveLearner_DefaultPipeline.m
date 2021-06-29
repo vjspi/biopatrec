@@ -249,6 +249,8 @@ tAcc = 0;       % Initialize as zero to compare best performance in loop
 tStd = inf;     % Required if deviation of class results is important as well
     
 for i = 1 : nRep
+    
+    disp(['### Trial ', num2str(i), ' ###'])
 
     patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets, alg, tType, algConf, movMix, topology, confMatFlag, featReducAlg, posPerfFlag);
     tempPerformance = patRec.performance;
@@ -284,16 +286,56 @@ imuDataFam = idata(:,1:4);
 addThreshold = 1;
 [patRec, handles] = AugmentPatRec(tDataFam, imuDataFam, handles, alg, addThreshold);
 
+%Show how many samples were added
+disp('Added samples:');
+disp(patRec.patRecAug.nSAddAll);
+disp('---------------');
 
 handles.patRec = patRec; % Update
 
+% Save best patRec and the statistics of trials
 save([path, '\', file, '_patRec'], 'patRec', 'kFoldStat');
 
+hObject = Load_patRec(handles.patRec, 'GUI_TestPatRec_Mov2Mov',1);
 
-Load_patRec(handles.patRec, 'GUI_TestPatRec_Mov2Mov',1);
-% set(button, 'String', 'Train Individual Mov)');
 waitbar(1,progress,'Training');
 close(progress);
+
+%% TAC Test
+nTrials = 6; % three trials for each algorithm
+nRep = 3; % For each position
+testTime = 20;  % in secondsa
+allowance = 5;  % in degrees
+distance = 40;  % in degrees -> could be a vector such as [10 20 30] - then allowance need to be the same
+
+% Generate random order vector
+idxTrials = zeros(nTrials,1);
+for i = 1:2:(nTrials-1);
+    idxTrials(i)=randi([1,2],1);
+    if idxTrials(i) == 2;
+        idxTrials(i+1) = 1;
+    else
+        idxTrials(i+1) = 2;
+    end
+end
+
+% Save mainGUI handle to guidata of GUI_TacTest
+GUI = eval('GUI_TacTest');
+TacHandles = guidata(GUI);
+
+% Change values
+set(TacHandles.tb_trials, 'String', num2str(nTrials));
+set(TacHandles.tb_repetitions, 'String', num2str(nRep));
+set(TacHandles.tb_executeTime, 'String', num2str(testTime));
+set(TacHandles.tb_allowance, 'String', num2str(allowance));
+set(TacHandles.tb_allowance, 'String', num2str(allowance));
+
+    TacHandles.mainGUI = hObject;
+guidata(GUI,TacHandles);
+
+% set(button, 'String', 'Train Individual Mov)');
+
+
 
 % movMix = 'Mixed Output';
 % randFeatures = true;
