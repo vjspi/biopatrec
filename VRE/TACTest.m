@@ -62,6 +62,8 @@
 %                                 NI devices (replacing tWs for PEEK time).                                
 % 2018-08-01 / Andreas Eiler        Adapted code to new function 'count' by
 %                                   replacing variable count by count_rep
+% 2021-06-30 / Veronika Spieker / Created variables to store recorded
+%                                features and results in one table for later processing
 % 20xx-xx-xx / Author     / Comment on update                          
 
 
@@ -89,6 +91,18 @@ function success = TACTest(patRecX, handlesX)
     global distance %FIX
     global overshoot
     global nOvershoot
+    
+    % To save recorded windows for later processing
+    global dataTW;
+    global iDataTW;
+    global movTW;
+    
+    global allFeat; 
+    global allFeatIMU;
+    global allMov;
+    allFeat = []; allFeatIMU = []; allMov = [];
+    
+   
     
     patRec = patRecX;
     handles = handlesX;
@@ -120,7 +134,12 @@ function success = TACTest(patRecX, handlesX)
     nCh                 = length(patRec.nCh);       
     ComPortType         = patRec.comm;
     deviceName          = patRec.dev;
-
+    
+    % Initialize result tables
+    allCompletionTime = zeros(tacTest.trials,tacTest.nR);
+    allSelectionTime = zeros(tacTest.trials,tacTest.nR);
+    allSelectionTimeA = zeros(tacTest.trials,tacTest.nR);
+    
     % Get sampling time
     sT = tacTest.timeOut;
     tW = patRec.tW;                                                            % Time window size
@@ -179,9 +198,37 @@ function success = TACTest(patRecX, handlesX)
 % 
 %     CurrentPosition('init',patRec,allowance, handles.movList);
 %     TrackStateSpace('initialize',patRec,allowance); 
+
+
+    %% Check for multiple algorithms - Assumes 2 algorithms with naming convention "_Old" (1) and "_New" (2)
+    if isfield(patRec, 'patRecAug')
+        
+        handles.namesAlg = {'patRecTrained_Old'; 'patRecTrained_New'};
+        %Create randomized order of usage of algorithms
+        indexOrderAlg = zeros(trials,1);
+        for a = 1:2:(trials-1)
+            indexOrderAlg(a)=randi([1,2],1);
+            if indexOrderAlg(a) == 2
+                indexOrderAlg(a+1) = 1;
+            else
+                indexOrderAlg(a+1) = 2;
+            end
+        end
+        handles.indexOrderAlg = indexOrderAlg;
+    end
     
     %Run through all the trials
     for t = 1 : trials
+        
+        % Choose the algorithm
+        if handles.indexOrderAlg(t) == 1
+            patRec.patRecTrained = patRec.patRecAug.patRecTrained_Old;
+        else % if equals 2
+            patRec.patRecTrained = patRec.patRecAug.patRecTrained_New;
+        end
+          
+        patRec.selAlgorithm = handles.indexOrderAlg(t);
+        
         %Create a random order for the wanted movements.
         indexOrder = GetMovementCombination(handles.dofs,patRec.nOuts-1);
         tacTest.combinations = size(indexOrder,1);
@@ -193,6 +240,17 @@ function success = TACTest(patRecX, handlesX)
             
         for r = 1 : reps
             set(handles.txt_status,'String',sprintf('Trial: %d , Rep: %d.',t,r));
+            
+            % Show Position for desired repetition
+            if get(handles.cb_posVisualization, 'Value')
+                backgroundImage2 = importdata(strcat('../Img/Positions/Pos', num2str(r) ,'.jpg'));
+                %select the axes
+                axes(handles.axes_image);
+                %place image onto the axes
+                image(backgroundImage2);
+                %remove the axis tick marks
+                axis off
+            end
 
             %Loop through all of the movements
             for i = 1 : size(indexOrder,1)
@@ -369,7 +427,7 @@ function success = TACTest(patRecX, handlesX)
                         StopAcquisition(deviceName, obj);
                 end
 
-
+                
                 test.recordedMovements = recordedMovements;
                 test.completionTime = completionTime;
                 test.selectionTime = selectionTime;
@@ -396,6 +454,16 @@ function success = TACTest(patRecX, handlesX)
                 %Save the data to the trialResult in each trial, repetitition
                 %and movement.
                 tacTest.trialResult(t,r,i) = test;
+                
+                allCompletionTime(t,r,i) = completionTime;
+                allSelectionTime(t,r,i) = selectionTime;
+                allSelectionTimeA(t,r,i) = selectionTimeA;
+                allDistance(t,r,i) = distance;
+%                 allFail(t,r) = isnan(completionTime);
+                
+                allFeat = cat(3, allFeat, dataTW);
+                allFeatIMU = cat(3, allFeatIMU, iDataTW);
+                allMov = cat(2, allMov, movTW);
 
                 tempData = [];
                 if (handles.SMCtestEnabled) % show green hand for confirmation
@@ -408,7 +476,14 @@ function success = TACTest(patRecX, handlesX)
         end
     end
 
+    tacTest.tableResults.allCompletionTime = allCompletionTime;
+    tacTest.tableResults.allSelectionTime = allSelectionTime;
     tacTest.ssTracker = TrackStateSpace('read');
+    
+    tacTest.tdata = allFeat;
+    tacTest.idata = allFeatIMU;
+    tacTest.labels = allMov;
+    
 
     % Save test
     [filename, pathname] = uiputfile({'*.mat','MAT-files (*.mat)'},'Save as', 'Untitled.mat');
@@ -431,6 +506,8 @@ function TACTest_OneShot(src,event)
     global nTW;     % Number of time windows evaluated
     global fpTW;    % First time window with any movement.
     global dataTW;  % Raw data from each time windows
+    global iDataTW;
+    global movTW;   % identified movement
     global tempData;
     global tempDataIMU;
     %global speed;
@@ -462,17 +539,20 @@ function TACTest_OneShot(src,event)
         tData = tempData(end-patRec.sF*patRec.tW+1:end,:);  %Copy the temporal data to the test data
         dataTW(:,:,nTW) = tData;                            % Save data for future analisys
 
+
         %Start counting processing time
         processingTimeTic = tic;
 
-        
         % General routine for RealtimePatRec
         if isfield(event, 'IMU')
-            idata = tempDataIMU(end-patRec.sF*patRec.tW+1:end,:); 
-            [outMov outVector patRec handles.patRecHandles] = OneShotRealtimePatRec(tData, patRec, handles.patRecHandles, thresholdGUIData, idata);
+            iData = tempDataIMU(end-patRec.sF*patRec.tW+1:end,:); 
+            iDataTW(:,:,nTW) = iData;
+            [outMov outVector patRec handles.patRecHandles] = OneShotRealtimePatRec(tData, patRec, handles.patRecHandles, thresholdGUIData, iData);        
         else
             [outMov outVector patRec handles.patRecHandles] = OneShotRealtimePatRec(tData, patRec, handles.patRecHandles, thresholdGUIData, []);
         end
+        
+        movTW(nTW) = outMov;
         
         TrackStateSpace('move',outMov, patRec.control.currentDegPerMov);
         CurrentPosition('move',outMov, patRec.control.currentDegPerMov);
