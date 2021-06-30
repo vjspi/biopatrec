@@ -30,11 +30,11 @@ function [patRec, handles] = AugmentPatRec(tDataNew, quatDataNew, handles, varar
 % patRecAug is the model after additional data is fed
 if ~isempty(varargin)
     alg = varargin{1};
-    addThreshold = varargin{2};                
+    nSMajVote = varargin{2};                
 else 
     % Default Settings
     alg = 'Discriminant A.';
-    addThreshold = 1;
+    nSMajVote = 1;
 end
 patRecCal = handles.patRec;   
 
@@ -134,7 +134,6 @@ for i = 1:nW
     outPos(i,1)     = OneShotPositionEstimation(patRecCal.pos,trImuFam(i,:));
 end
 
-
 % Plot to test feasibility
 % h = figure;
 % hold on;
@@ -157,25 +156,54 @@ for k = 1:length(idxFamPhase)
 end
 
 % Number of samples that are going to be added for training
-nSAdd = zeros(nP,nM);  
+nSAdd_preProc = zeros(nP,nM);  
+
+% Initialization for P
+nSAdd_postProc = zeros(nP,nM);
+if ~exist('nSMajVote', 'var')
+    nSMajVote = 1;  % if no MajVote defined -> then no processing by only looking at one sample
+end
 
 if ~isempty(idxAdapt)
     
     for j = 1:size(idxAdapt,1)
-
+        
         ind{j,1} = find(ismember(idxFamPhase,idxAdapt(j,:),'rows'));
-
-        if length(ind{j}) >= addThreshold;
-            nSAdd(idxAdapt(j,1), idxAdapt(j,2)) = length(ind{j});
-            trFeatFam_Sel = [trFeatFam_Sel; trFeatFam(ind{j},:)];       % Selected feature vector
-
-            tempOut = outMov(ind{j});
-            tempOutMask = zeros(length(tempOut),nM);
-            for k = 1:length(tempOut) 
-                tempOutMask(k, tempOut(k)) = 1; 
-            end 
-            trOutFam_Sel = [trOutFam_Sel; tempOutMask];                 % Selected out vector
+        ind_majVote = [];       % initialize for each position/hand motion
+        
+        % ###### Apply Majority Vote
+        for k = 1:length(ind{j,1})
+            desired = idxAdapt(j,2);
+            indTemp = ind{j,1}(k);
+            if indTemp >= nSMajVote;
+                % Get previous predicted positions for majority vote,
+                % second index "2" for position
+                sequence = idxFamPhase(indTemp-nSMajVote+1:indTemp,2);
+                majVote = mode(sequence);
+                if majVote == desired
+                    ind_majVote = [ind_majVote; indTemp];
+                end       
+            else
+                %do nothing
+            end    
         end
+        
+        ind_postProc{j,1} = ind_majVote;                                % Save indices of Majority Vote
+
+        
+%         if length(ind{j}) >= addThreshold
+%         end
+        nSAdd_preProc(idxAdapt(j,1), idxAdapt(j,2)) = length(ind{j});
+        nSAdd_postProc(idxAdapt(j,1), idxAdapt(j,2)) = length(ind_postProc{j});
+        trFeatFam_Sel = [trFeatFam_Sel; trFeatFam(ind_postProc{j},:)];       % Selected feature vector
+
+        tempOut = outMov(ind_postProc{j});
+        tempOutMask = zeros(length(tempOut),nM);
+        for k = 1:length(tempOut) 
+            tempOutMask(k, tempOut(k)) = 1; 
+        end 
+        trOutFam_Sel = [trOutFam_Sel; tempOutMask];                 % Selected out vector
+
 
     end
 else
@@ -183,11 +211,11 @@ else
 end
 
 % Check if any data has been added
-if ~any(nSAdd, 'all')
+if ~any(nSAdd_postProc, 'all')
     disp('### NO DATA ADAPTATION (no data for underrepresented samples available) ! ###')
 end
 
-nSAddAll = nSAdd';
+nSAddAll = nSAdd_postProc';
 nSAddAll(end+1,:) = sum(nSAddAll,1);
 
 % Plot added features
@@ -229,9 +257,10 @@ patRec.patRecAug.patRecTrained_New= patRecTrained_New;
 patRec.patRecAug.performance_New = performance_New;
 
 patRec.patRecAug.nSTot = nSTot;
-patRec.patRecAug.nSAdd = nSAdd;
+patRec.patRecAug.nSAdd = nSAdd_preProc;
+patRec.patRecAug.nSAdd_postProc = nSAdd_postProc;
 patRec.patRecAug.nSAddAll = nSAddAll;
-patRec.patRecAug.addThreshold = addThreshold;
+patRec.patRecAug.nSMajVote = nSMajVote;
 patRec.patRecAug.accThreshold = patRecCal.accThreshold;  %%%%%%%%%%%%%% Adjust!
     
 end
