@@ -26,7 +26,7 @@
 % [Contributors are welcome to add their email]
 % 2021-06-14 / Veronika Spieker
 
-function [accPos, accTruePos, idxAdapt] = PositionPerformance_Analysis(patRec, performancePos, accThreshold, confMatAll, confMatPos, confMatFlag)
+function [accPos, accTruePos, idxAdapt] = PositionPerformance_Analysis(patRec, performancePos, accThreshold, specThreshold, confMatAll, confMatPos, confMatFlag)
 
 nM      = size(patRec.mov,1);     
 pos = patRec.pos.idx;
@@ -60,6 +60,7 @@ end
 for p = 1:length(performancePos)
     accPos(:,p) = performancePos{p}.acc;
     accTruePos(:,p) =  performancePos{p}.accTrue;
+    specificity(:,p) = performancePos{p}.specificity;
 end
 
 f = figure;
@@ -69,7 +70,22 @@ set(gca, 'YTick', 1:(nM+1)); set(gca, 'YTickLabel', [patRec.mov; 'All']);
 % colormap winter;
 colorbar;
 hold on;
-[idxAdapt(:,2), idxAdapt(:,1)] = find(accPos < accThreshold);
+accPos(isnan(accPos))=0;  % Replace NaN values -> this way the not available positions get adapted as well
+
+% Find underrepresented hand motions in poses
+[idxUnderRep(:,2), idxUnderRep(:,1)] = find(accPos < accThreshold);
+
+% Identify minimum specifity (to ensure that classifier fulfills minimum
+% certainty of providing TP rather than FP)
+iMinSpec = [];
+for i = 1:length(idxUnderRep)
+    if specThreshold <= specificity(idxUnderRep(i,2), idxUnderRep(i,1))
+        iMinSpec = [iMinSpec, i];
+    end
+end
+
+% Only adapt underrepresented samples with high specificity
+idxAdapt = idxUnderRep(iMinSpec, :);
 plot(idxAdapt(:,1), idxAdapt(:,2), 'k*');
 
 end

@@ -280,13 +280,16 @@ function patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets
     % Position specific performance (if selected)
     if posPerfFlag
         
-        accThreshold = 75;      % Threshold for position that needs to be adapted
+        accThreshold = 90;      % Threshold for position that needs to be adapted
+        specThreshold = 90;
         
         [performancePos confMatPos tTimePos sMPos] = PositionPerformance_patRec(patRec, tSets, tOuts, tPos, confMatFlag);
         
-        [accPos, accTruePos, idxAdapt] = PositionPerformance_Analysis(patRec, performancePos, accThreshold, confMatAll, confMatPos, confMatFlag);
+        [accPos, accTruePos, idxAdapt] = PositionPerformance_Analysis(patRec, performancePos, accThreshold, specThreshold, confMatAll, confMatPos, confMatFlag);
         patRec.idxAdapt = idxAdapt;
-        patRec.accThreshold = accThreshold;        
+        patRec.accThreshold = accThreshold; 
+        patRec.specThreshold = specThreshold; 
+        patRec.performancePos = performancePos;
         % Save for later data augmentation
         patRec.Sets.trSets = trSets; 
         patRec.Sets.trOuts = trOuts;
