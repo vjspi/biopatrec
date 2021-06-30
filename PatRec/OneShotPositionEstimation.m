@@ -31,14 +31,21 @@ nPos = length(pos.idx);
 
 imuEuler = quat2eul(imuSet); % XYZ rotation
 
-for iPos = 1:nPos
-   if imuEuler(2) <= pos.range(iPos+1)
-       outPos = iPos;
-       break;
-   else
-       % Continue in loop to check for next position
-   end
+if ~isnan(imuEuler(2))
+    
+    for iPos = 1:nPos
+       if imuEuler(2) <= pos.range(iPos+1)
+           outPos = iPos;
+           break;
+       else
+           % Continue in loop to check for next position
+       end
+    end
+    
+else
+    outPos = NaN;
 end
+
    
 %     
 %     if strcmp(patRecTrained.algorithm,'MLP') || ...
