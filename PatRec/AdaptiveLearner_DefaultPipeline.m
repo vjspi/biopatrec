@@ -27,12 +27,12 @@
 % 2021-06-21 / Veroniks S.  / Adaptation to execute an adaptive Learning
 %                           process
 
-function AdaptiveLearner_DefaultPipeline()
+function AdaptiveLearner_test2fam()
 
 % path = uigetdir;
 file = 'cal';
-fileAdapt = 'fam';
-path = 'C:\Users\spieker\LRZ Sync+Share\MasterThesis\20_Coding\DataSets\20_MyoMex_NoScale';
+fileAdapt = 'fam_tacTest';
+path = 'C:\Users\spieker\LRZ Sync+Share\MasterThesis\20_Coding\DataSets\28_Lorenzo';
 % [file, path] = uigetfile({'*.mat';'*.csv'});
 load([path,'\',file]);
 % set(button, 'String', 'Wait');
@@ -70,7 +70,7 @@ handles ={};
 % no downsampling
 % no noise adding
 % no scaling
-cTp = 1.0;
+cTp = 0.6;          % Total recording of 10 seconds -> account for reaction time -> ensure inclusion of all positions
 
 sigTreated = RemoveTransient_cTp(recSession, cTp);
 sigTreated = AddRestAsMovement(sigTreated, recSession);
@@ -216,17 +216,18 @@ waitbar(0.85,progress,'Training');
 
 movMix = 'Individual Mov';
 randFeatures = true;
-confMatFlag = false;
+confMatFlag = true;
 posPerfFlag = true;
 alg = 'Discriminant A.';
 tType = 'linear';
 topology = 'Single Classifier';                             % !!!!!!!!!!!!!!!!!!CHANGE???????????????????????????????????????????
-selFeatures = {'tmabs';'twl';'tzc';'tslpch2'};
+selFeatures = {'tmabs';'twl';'tzc';'tslpch2'; 'itmn_quat'}; % Will only work if recorded with Thalmic MyoBans (Quat incl. Real-time)
 normSets = 'Select Normalization';
 algConf = [];
 featReducAlg = 'Select Reduc./Selec.';
 %Adaptive Learning parameters
-sigFeatures.accThreshold = 75;
+sigFeatures.accThreshold = 90;
+
 %% Train model for defined repetitions
 nRep = 3;
 kFoldStat.kFold = nRep;
@@ -278,13 +279,50 @@ end
 
 % patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets, alg, tType, algConf, movMix, topology, confMatFlag, featReducAlg, posPerfFlag);
 handles.patRec = bestPatRec;
+% Load patRec
+RealTimeFigure = Load_patRec(handles.patRec, 'GUI_TestPatRec_Mov2Mov',1);
+RealTimeHandles = guidata(RealTimeFigure);
+
+GUI_TestPatRec_Mov2Mov('pb_socketDisconnect_Callback', RealTimeFigure, [], RealTimeHandles);
+GUI_TestPatRec_Mov2Mov('pb_socketConnect_Callback', RealTimeFigure, [], RealTimeHandles);
+
+%% ###################### FAMILIARIZATION #################################
+% Do TAC Test
+
+TacValues_Fam.nTrials = 3; % three trials with different weight each
+TacValues_Fam.nRep = 3; % for different position each
+TacValues_Fam.testTime= 15;  % in seconds
+TacValues_Fam.allowance = 8;  % in degrees
+TacValues_Fam.distance = 60;  % in degrees -> could be a vector such as [10 20 30] - then allowance need to be the same
+TacValues_Fam.dwellT = 1;   % in seconds
+% Save mainGUI handle to guidata of GUI_TacTest
+GUI = eval('GUI_TacTest');
+TacHandles = guidata(GUI);
+TacHandles.mainGUI = RealTimeFigure;
+
+changeTacValues(TacHandles, GUI, TacValues_Fam);
+guidata(GUI,TacHandles);
+
+% wait to continue
+prompt = 'Familiarization finished? Y/N [Y]: ';
+str = input(prompt,'s');
+if isempty(str)
+    prompt = 'Sure to stop?';
+    str = input(prompt,'s');
+end
+%% ######################### TESTING ###################################### 
 
 %% Augment
 load([path,'\',fileAdapt]);
-tDataFam = cdata;
-imuDataFam = idata(:,1:4);   
-addThreshold = 1;
-[patRec, handles] = AugmentPatRec(tDataFam, imuDataFam, handles, alg, addThreshold);
+
+% For FastRecSessiom
+% fastRecSession.tdata = cdata;
+% fastRecSession.idata = idata(:,1:4);  
+
+% For TacTest
+handles.fam.tacTest = tacTest;
+nSMajVote = 5;
+[patRec, handles] = AugmentPatRec(handles, alg, nSMajVote);
 
 %Show how many samples were added
 disp('Added samples:');
@@ -301,11 +339,14 @@ hObject = Load_patRec(handles.patRec, 'GUI_TestPatRec_Mov2Mov',1);
 waitbar(1,progress,'Training');
 close(progress);
 
+
+
+
 %% TAC Test
 nTrials = 6; % three trials for each algorithm
 nRep = 3; % For each position
-testTime = 20;  % in secondsa
-allowance = 5;  % in degrees
+testTime = 15;  % in secondsa
+allowance = 8;  % in degrees
 distance = 40;  % in degrees -> could be a vector such as [10 20 30] - then allowance need to be the same
 
 % Generate random order vector
@@ -323,15 +364,7 @@ end
 GUI = eval('GUI_TacTest');
 TacHandles = guidata(GUI);
 
-% Change values
-set(TacHandles.tb_trials, 'String', num2str(nTrials));
-set(TacHandles.tb_repetitions, 'String', num2str(nRep));
-set(TacHandles.tb_executeTime, 'String', num2str(testTime));
-set(TacHandles.tb_allowance, 'String', num2str(allowance));
-set(TacHandles.tb_allowance, 'String', num2str(allowance));
-
-    TacHandles.mainGUI = hObject;
-guidata(GUI,TacHandles);
+%%%%%%%%%%%% OPEN VRE!!!!!!!!!!!!!!!!!
 
 % set(button, 'String', 'Train Individual Mov)');
 
@@ -353,4 +386,17 @@ guidata(GUI,TacHandles);
 % set(button, 'String', 'Train Simultaneous Mov'); 
 % waitbar(1,progress,'Training');
 % close(progress);
+end
+
+% Change values
+function changeTacValues(TacHandles, GUI, TacValues)
+set(TacHandles.tb_trials, 'String', num2str(TacValues.nTrials));
+set(TacHandles.tb_repetitions, 'String', num2str(TacValues.nRep));
+set(TacHandles.tb_executeTime, 'String', num2str(TacValues.testTime));
+set(TacHandles.tb_allowance, 'String', num2str(TacValues.allowance));
+set(TacHandles.tb_distance, 'String', num2str(TacValues.distance));
+set(TacHandles.tb_time, 'String', num2str(TacValues.dwellT));
+
+guidata(GUI,TacHandles);
+
 end
