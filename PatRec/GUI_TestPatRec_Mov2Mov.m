@@ -1,5 +1,5 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
@@ -79,7 +79,7 @@ function varargout = GUI_TestPatRec_Mov2Mov(varargin)
 
 % Edit the above text to modify the response to help GUI_TestPatRec_Mov2Mov
 
-% Last Modified by GUIDE v2.5 05-Dec-2016 15:09:35
+% Last Modified by GUIDE v2.5 25-Jun-2021 13:34:07
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -113,6 +113,16 @@ function GUI_TestPatRec_Mov2Mov_OpeningFcn(hObject, eventdata, handles, varargin
 
 % Choose default command line output for GUI_TestPatRec_Mov2Mov
 handles.output = hObject;
+
+% if isfield(handles.patRec, 'patRecAug')    % Change!!!!!!!!!!!!!!!!
+% if isfield(handles.patRec, 'patRecAug')    % Change!!!!!!!!!!!!!!!!
+%     set(handles.rb_patRecStandard, 'Enable', 'on');
+%     set(handles.rb_patRecAdapted, 'Enable', 'on');
+% else
+%     set(handles.rb_patRecStandard, 'Enable', 'on');
+%     set(handles.rb_patRecAdapted, 'Enable', 'off');
+% end
+
 global TAC
 
 TAC.running = 0;
@@ -160,6 +170,9 @@ axes(handles.axes3);
 image(backgroundImage2);
 %remove the axis tick marks
 axis off
+
+%Save patRec in handles
+handles.patRec = patRec;
 
 % Set the proportional control to be off at start up
 handles.propControl = false;
@@ -2679,3 +2692,68 @@ FittsHandles = guidata(GUI);
 
 FittsHandles.mainGUI = hObject;
 guidata(GUI,FittsHandles); 
+
+
+% --- Executes on button press in rb_patRecStandard.
+function rb_patRecStandard_Callback(hObject, eventdata, handles)
+% hObject    handle to rb_patRecStandard (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of rb_patRecStandard
+
+if isfield(handles.patRec, 'patRecAug')
+    handles.patRec.patRecTrained = handles.patRec.patRecAug.patRecTrained_Old;
+    handles.patRec.performance = handles.patRec.patRecAug.performance_Old;
+else
+    set(handles.t_msg, 'String', 'No adapted patRec available');
+    set(handles.rb_patRecAdapted, 'Value', 1.0);
+    set(handles.rb_patRecStandard, 'Value', 0.0);
+%     rb_patRecStandard_Callback(hObject, eventdata, handles);
+end
+
+% Update handles structure
+guidata(hObject, handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function rb_patRecStandard_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to rb_patRecStandard (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on button press in rb_patRecAdapted.
+function rb_patRecAdapted_Callback(hObject, eventdata, handles)
+% hObject    handle to rb_patRecAdapted (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of rb_patRecAdapted
+
+if isfield(handles.patRec, 'patRecAug')
+    handles.patRec.patRecTrained = handles.patRec.patRecAug.patRecTrained_New;
+    handles.patRec.performance = handles.patRec.patRecAug.performance_New;
+else
+    set(handles.t_msg, 'String', 'No adapted patRec available');
+    set(handles.rb_patRecAdapted, 'Value', 0.0);
+    set(handles.rb_patRecStandard, 'Value', 1.0);
+%     rb_patRecStandard_Callback(hObject, eventdata, handles);
+end
+
+% Update handles structure
+guidata(hObject, handles);
+
+% --- Executes during object creation, after setting all properties.
+function rb_patRecAdapted_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to rb_patRecAdapted (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes during object creation, after setting all properties.
+function bg_patRecSel_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to bg_patRecSel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
