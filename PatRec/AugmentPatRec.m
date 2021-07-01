@@ -17,6 +17,12 @@
 %
 % -------------------------- Function Description -------------------------
 % Function to calculate a classifier with an expanded data set
+% Input:    handles:    must include the previous patRec and an additional
+%                       recording Set (either to classify or including
+%                       labels)
+%           varargin:   Parameters for Algorithm Selection &  Majority 
+%                       Voting (Post-Processing)
+% Output:   patRec:     With new field "patRecAug" with two classifiers
 %
 % ------------------------- Updates & Contributors ------------------------
 % [Contributors are welcome to add their email]
@@ -24,10 +30,8 @@
 % augmented classifier
 % 20xx-xx-xx / Author    / Comment on update
 
-function [patRec, handles] = AugmentPatRec(tDataNew, quatDataNew, handles, varargin)
+function [patRec, handles] = AugmentPatRec(handles, varargin)
 
-% patRecCal is the initial model after calibraton, 
-% patRecAug is the model after additional data is fed
 if ~isempty(varargin)
     alg = varargin{1};
     nSMajVote = varargin{2};                
@@ -36,6 +40,8 @@ else
     alg = 'Discriminant A.';
     nSMajVote = 1;
 end
+% patRecCal is the initial model after calibraton, 
+% patRecAug is the model after additional data is fed
 patRecCal = handles.patRec;   
 
 % Load stacked data (rather than sigFeatures -> this ensures that the same
@@ -58,88 +64,123 @@ else
     algConf = [];
 end
 
-%% Segment acquired data
-tWsamples = patRecCal.tW * patRecCal.sF;          % number of samples per window 
-oS = patRecCal.wOverlap * patRecCal.sF;           % number of samples corresponding overlay
-nSmp = length(tDataNew);
-nCh = size(tDataNew, 2);
-nImu = size(quatDataNew, 2);
-
-% Number of windows available
-if oS == 0
-    nW = fix(nSmp/tWsamples);
-else 
-    offset = ceil((patRecCal.tW-patRecCal.wOverlap)/patRecCal.wOverlap);
-    nW = fix(nSmp/oS)-offset;  
-end
-
-trSetsFam = zeros(tWsamples, nCh, nW);  %Initialize number of training matrices
-% trFeatFam = zeros(nW, nCh*length(patRecCal.selFeatures));     % Undefined because IMU and EMG features vary in length
-
-imuSetsAug = zeros(tWsamples, nImu, nW);
-trImuFam = zeros(nW, nImu);
-% trPosAug = zeros(nW, 1);
-
-for i = 1 : nW
-    iidx = 1 + (oS * (i-1));
-    eidx = tWsamples + (oS *(i-1));
-    trSetsFam(:,:,i) = tDataNew(iidx:eidx,:);           % Raw data
-    iSetsFam(:,:,i) = quatDataNew(iidx:eidx,:);         % Raw data of IMU
-    trFeatFam(i,:) = SignalProcessing_RealtimePatRec(trSetsFam(:,:,i), patRecCal, iSetsFam(:,:,i));  % Processed and features extracted
+%% Different input file options: 
+% Fast recSession where idata & cdata are included -> Create labels
+if isfield(handles.fam, 'tdata') && isfield(handles.fam, 'cdata')
+    tDataNew = dataStruct.tdata;
+    quatDataNew = dataStruct.idata;
     
-    imuSetsAug(:,:,i) = quatDataNew(iidx:eidx,:); 
-    % Direct processing -> how to combine with selection? Currently no
-    % preprocessing -> save iFilter from preProcessing
-    trImuFam(i,:) =  mean(imuSetsAug(:,:,i));
-end
-    
-%% Classify/Evaluate
-outMov = zeros(nW,1);
-outPos = zeros(nW, 1);
+    %% Segment acquired data
+    tWsamples = patRecCal.tW * patRecCal.sF;          % number of samples per window 
+    oS = patRecCal.wOverlap * patRecCal.sF;           % number of samples corresponding overlay
+    nSmp = length(tDataNew);
+    nCh = size(tDataNew, 2);
+    nImu = size(quatDataNew, 2);
 
-%% Floor noise
-% Only predict when signal is over floor noise?
-if(isfield(patRecCal,'floorNoise'));
+    % Number of windows available
+    if oS == 0
+        nW = fix(nSmp/tWsamples);
+    else 
+        offset = ceil((patRecCal.tW-patRecCal.wOverlap)/patRecCal.wOverlap);
+        nW = fix(nSmp/oS)-offset;  
+    end
+
+    trSetsFam = zeros(tWsamples, nCh, nW);  %Initialize number of training matrices
+    % trFeatFam = zeros(nW, nCh*length(patRecCal.selFeatures));     % Undefined because IMU and EMG features vary in length
+
+    imuSetsAug = zeros(tWsamples, nImu, nW);
+    trImuFam = zeros(nW, nImu);
+    % trPosAug = zeros(nW, 1);
+
+    for i = 1 : nW
+        iidx = 1 + (oS * (i-1));
+        eidx = tWsamples + (oS *(i-1));
+        trSetsFam(:,:,i) = tDataNew(iidx:eidx,:);           % Raw data
+        iSetsFam(:,:,i) = quatDataNew(iidx:eidx,:);         % Raw data of IMU
+        trFeatFam(i,:) = SignalProcessing_RealtimePatRec(trSetsFam(:,:,i), patRecCal, iSetsFam(:,:,i));  % Processed and features extracted
+
+        imuSetsAug(:,:,i) = quatDataNew(iidx:eidx,:); 
+        % Direct processing -> how to combine with selection? Currently no
+        % preprocessing -> save iFilter from preProcessing
+        trImuFam(i,:) =  mean(imuSetsAug(:,:,i));
+    end
     
-    for i = 1:nW
-        augSet = trFeatFam(i,:);
-        meanFeature1 = mean(augSet(1:size(patRecCal.nCh,2)));
-        fnoiseDiv = 1;
-        if meanFeature1 < (patRecCal.floorNoise(1)/fnoiseDiv);
-            outMov(i) = patRecCal.nOuts;
-%             outVector = zeros(patRecCal.nOuts,1);
-%             outVector(end) = 1;
-        else
-             % Apply feature reduction
+    %% Classify/Evaluate
+    outMov = zeros(nW,1);
+    outPos = zeros(nW, 1);
+
+    %% Floor noise
+    % Only predict when signal is over floor noise?
+    if(isfield(patRecCal,'floorNoise'));
+
+        for i = 1:nW
+            augSet = trFeatFam(i,:);
+            meanFeature1 = mean(augSet(1:size(patRecCal.nCh,2)));
+            fnoiseDiv = 1;
+            if meanFeature1 < (patRecCal.floorNoise(1)/fnoiseDiv);
+                outMov(i) = patRecCal.nOuts;
+    %             outVector = zeros(patRecCal.nOuts,1);
+    %             outVector(end) = 1;
+            else
+                 % Apply feature reduction
+                augSet = ApplyFeatureReduction(augSet, patRecCal);
+                % One shoot PatRec
+                [outMov(i), ~] = OneShotPatRecClassifier(patRecCal, augSet);
+            end   
+        end
+
+    else
+        % If no floor noise
+        for i = 1:nW
+            augSet = trFeatFam(i,:);
+            % Apply feature reduction
             augSet = ApplyFeatureReduction(augSet, patRecCal);
             % One shoot PatRec
-            [outMov(i), ~] = OneShotPatRecClassifier(patRecCal, augSet);
-        end   
+            [outMov(i), ~] = OneShotPatRecClassifier(patRecCal, augSet);        
+        end
     end
-    
-else
-    % If no floor noise
+
     for i = 1:nW
-        augSet = trFeatFam(i,:);
-        % Apply feature reduction
-        augSet = ApplyFeatureReduction(augSet, patRecCal);
-        % One shoot PatRec
-        [outMov(i), ~] = OneShotPatRecClassifier(patRecCal, augSet);        
+        [outMov(i), ~]  = OneShotPatRecClassifier(patRecCal, trFeatFam(i,:));
+        % Evaluate with certainty?
+        outPos(i,1)     = OneShotPositionEstimation(patRecCal.pos,trImuFam(i,:));
     end
-end
 
-for i = 1:nW
-    [outMov(i), ~]  = OneShotPatRecClassifier(patRecCal, trFeatFam(i,:));
-    % Evaluate with certainty?
-    outPos(i,1)     = OneShotPositionEstimation(patRecCal.pos,trImuFam(i,:));
-end
-
-% Plot to test feasibility
-% h = figure;
-% hold on;
-% plot(trPosAug);
-% hold off
+    % Plot to test feasibility
+    % h = figure;
+    % hold on;
+    % plot(trPosAug);
+    % hold off
     
+% tacTest with sample data and labels
+elseif isfield(handles.fam, 'tacTest') 
+    
+    famTacTest = handles.fam.tacTest;
+    % if TacTest already provides segmented data with labels
+    
+    trFeatFam = famTacTest.tdata;       % Feature segments
+    imuSetsAug = famTacTest.idata;      % Imu segments
+       
+    nW = size(trFeatFam, 3);            % Number of windows/samples
+    nImu = size(imuSetsAug, 2);         % Number of IMU channesl
+    
+    trImuFam = zeros(nW, nImu);         % Initialization of IMU Features
+    outPos = zeros(nW, 1);
+       
+    % Position estimation
+    for i = 1:nW
+        trImuFam(i,:) =  mean(imuSetsAug(:,:,i));       % IMU Feature (mean)
+        outPos(i,1) =  OneShotPositionEstimation(patRecCal.pos,trImuFam(i,:));
+    end
+    
+    % Motion estimation (already during TAC Test)
+    outMov = famTacTest.labels';
+
+else 
+       disp('### NO VALID FAMILIARIZATION SET ! ###')
+       errordlg('That was not a valid familiarization set','Error');
+end
+
 %% Find desired data
 idxAdapt = patRecCal.idxAdapt;      % Desired augmentation
 idxFamPhase = [outPos, outMov];
