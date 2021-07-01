@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and 
-% Chalmers University of Technology. All authors’ contributions must be kept
+% Chalmers University of Technology. All authors? contributions must be kept
 % acknowledged below in the section "Updates % Contributors". 
 %
 % Would you like to contribute to science and sum efforts to improve 
-% amputees’ quality of life? Join this project! or, send your comments to:
+% amputees? quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file 
@@ -74,7 +74,7 @@ function varargout = GUI_TacTest(varargin)
 
 % Edit the above text to modify the response to help GUI_TacTest
 
-% Last Modified by GUIDE v2.5 23-Feb-2017 16:35:02
+% Last Modified by GUIDE v2.5 28-Jun-2021 14:25:35
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -117,6 +117,14 @@ if isfield(handles,'cb_enableSMCtest')
     handles.SMCVibduration = 20; % ms/10
     handles.SMCposition    = 0;
 end
+
+backgroundImage2 = importdata('Img/noImage.png');
+%select the axes
+axes(handles.axes_image);
+%place image onto the axes
+image(backgroundImage2);
+%remove the axis tick marks
+axis off
 
 % Update handles structure
 guidata(hObject, handles);
@@ -311,6 +319,15 @@ else
 end
 set(handles.txt_status,'String','Finished TAC');
 
+
+% --- Executes on button press in pb_startSeries.
+function pb_startSeries_Callback(hObject, eventdata, handles)
+% hObject    handle to pb_startSeries (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+set(handles.cb_posVisualization, 'Value', 1.0); % Ensures visualiztation of positions
+
 function tb_allowance_Callback(hObject, eventdata, handles)
 % hObject    handle to tb_allowance (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -489,3 +506,23 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 function figure1_DeleteFcn(hObject, eventdata, handles)
+
+
+% --- Executes during object creation, after setting all properties.
+function axes_image_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_image (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes_image
+
+
+% --- Executes on button press in cb_posVisualization.
+function cb_posVisualization_Callback(hObject, eventdata, handles)
+% hObject    handle to cb_posVisualization (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of cb_posVisualization
+
+
