@@ -61,7 +61,7 @@ function varargout = GUI_AFEselection(varargin)
 
 % Edit the above text to modify the response to help GUI_AFEselection
 
-% Last Modified by GUIDE v2.5 22-Apr-2015 15:16:20
+% Last Modified by GUIDE v2.5 06-Jul-2021 16:15:53
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -218,6 +218,7 @@ end
 % % AFE_settings.NI.show
 
 AFE_settings.prepare      = get(handles.prepare,'Value');
+AFE_settings.multiPos     = get(handles.cb_multiPos,'Value');
 
 % GUI_AFEselection(Fs,Ne,Nr,Tc,Tr,Psr,msg,EMG_AQhandle)
 % cdata = recording_session(Fs,Ne,Nr,Tc,Tr,Psr,msg,EMG_AQhandle);
@@ -466,6 +467,10 @@ if strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Thalmic MyoBand 
     set(handles.ComPortType, 'Value', 1); %CK: I chose the NI ComPort because later in BPR it was easier to implement the MyoBand as an NI device, eventhough it isn't!
     set(handles.et_chs, 'String', '8');
 end
+
+if strcmp(deviceName, 'Thalmic MyoBand (Quat incl. Real-time)') 
+    set(handles.cb_multiPos, 'Value', 1.0);
+end
 guidata(hObject,handles);
 
 % --- Executes during object creation, after setting all properties.
@@ -669,3 +674,12 @@ function cb_recFeatures_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of cb_recFeatures
+
+
+% --- Executes on button press in cb_multiPos.
+function cb_multiPos_Callback(hObject, eventdata, handles)
+% hObject    handle to cb_multiPos (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of cb_multiPos
