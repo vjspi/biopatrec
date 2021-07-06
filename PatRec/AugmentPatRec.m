@@ -158,10 +158,10 @@ elseif isfield(handles.fam, 'tacTest')
     famTacTest = handles.fam.tacTest;
     % if TacTest already provides segmented data with labels
     
-    trFeatFam = famTacTest.tdata;       % Feature segments
+    trSegFam = famTacTest.tdata;       % Feature segments - extract features only for needed ones
     imuSetsAug = famTacTest.idata;      % Imu segments
        
-    nW = size(trFeatFam, 3);            % Number of windows/samples
+    nW = size(trSegFam, 3);            % Number of windows/samples
     nImu = size(imuSetsAug, 2);         % Number of IMU channesl
     
     trImuFam = zeros(nW, nImu);         % Initialization of IMU Features
@@ -231,21 +231,47 @@ if ~isempty(idxAdapt)
         
         ind_postProc{j,1} = ind_majVote;                                % Save indices of Majority Vote
 
-        
 %         if length(ind{j}) >= addThreshold
 %         end
         nSAdd_preProc(idxAdapt(j,1), idxAdapt(j,2)) = length(ind{j});
         nSAdd_postProc(idxAdapt(j,1), idxAdapt(j,2)) = length(ind_postProc{j});
-        trFeatFam_Sel = [trFeatFam_Sel; trFeatFam(ind_postProc{j},:)];       % Selected feature vector
-
+        
+        if isfield(handles.fam, 'tacTest') 
+            % Feature segments need to be transformed
+            
+            seg_temp = trSegFam(:,:,ind_postProc{j}); % Temporary segments
+            imu_temp = imuSetsAug(:,:,ind_postProc{j});
+            trFeatFam = [];
+            
+            for ii=1:size(seg_temp, 3)
+                trFeatFam(ii,:) = SignalProcessing_RealtimePatRec(seg_temp(:,:,ii), patRecCal, imu_temp(:,:,ii));
+            end
+            
+            if ~isempty(trFeatFam)
+                 trFeatFam_Sel = [trFeatFam_Sel; trFeatFam];       % Selected feature vector
+            else
+                 disp(strcat('### NO DATA ADAPTATION  for Pos ', num2str(idxAdapt(j,1)), ' mov ', num2str(idxAdapt(j,2)), '! ###'));
+            end
+        
+            
+        % if features are already provided
+        else 
+            
+             if ~isempty(trFeatFam)
+                 trFeatFam_Sel = [trFeatFam_Sel; trFeatFam(ind_postProc{j},:)];       % Selected feature vector
+             else
+                 disp(strcat('### NO DATA ADAPTATION  for Pos ', num2str(idxAdapt(j,1)), ' mov ', num2str(idxAdapt(j,2)), '! ###'));
+             end
+             
+        end
+        
+        % Stack the Output vector of desired samples
         tempOut = outMov(ind_postProc{j});
         tempOutMask = zeros(length(tempOut),nM);
         for k = 1:length(tempOut) 
             tempOutMask(k, tempOut(k)) = 1; 
         end 
         trOutFam_Sel = [trOutFam_Sel; tempOutMask];                 % Selected out vector
-
-
     end
 else
     disp('### NO DATA ADAPTATION (no underrepresented samples) ! ###')
