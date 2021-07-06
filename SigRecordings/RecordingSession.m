@@ -138,7 +138,7 @@ if isfield(afeSettings,'multiPos')
     % Current default order (divide sample time in 5 equal segments, 1st
     % and last as buffer, middle 3 for recording)
     handles.multiPosIdx = [1 1 2 3 1];
-    handles.multiPosSeg = (cT*nR)/length(handles.multiPosIdx);
+    handles.multiPosSeg = cT/length(handles.multiPosIdx);
     
 %     for k = 1:3
 %         fileNamePos = ['Img/Positions/Pos' num2str(k) '.jpg'];
@@ -468,14 +468,13 @@ while ex <= nM
             if handles.multiPos
                    
                 for i  = 1:length(handles.multiPosIdx)
+                    startPosTic = tic;
                     disp(num2str(handles.multiPosIdx(i)));
                     fileNamePos = ['Img/Positions/Pos' num2str(handles.multiPosIdx(i)) '.jpg'];       
                     posI = importdata(fileNamePos);   
                     pos_pic = image(posI,'Parent',handles.a_effortPlot); 
                     axis(handles.a_effortPlot,'off');    
-                    pause(handles.multiPosSeg - toc(startContractionTic));
-                    startContractionTic = tic;
-                     % Image
+                    pause(handles.multiPosSeg);
                 end
                
             else 
@@ -492,6 +491,7 @@ while ex <= nM
             end
             pic = image(relax,'Parent',handles.a_pic);                 % set image
             axis(handles.a_pic,'off');                                 % Remove axis tick marks
+            set(handles.a_effortPlot,'visible','off');
             handles.contraction = 0;
             pause(rT - toc(startRelaxingTic));
         end
