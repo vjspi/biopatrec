@@ -37,6 +37,8 @@
                             % the offset introduced by the AFE from the time
                             % window plot
 % 2015-10-28 / Martin Holder / >2014b plot interface fixes
+% 2021-07-06 / Veronika Spieker  / Adjusted timestamps computation for
+%                                Thalmic Myo Armband to ensure correct progress bar update
 
 % 20xx-xx-xx / Author  / Comment
 
@@ -83,15 +85,22 @@ function RecordingSession_ShowData(src, event)
     end
     
     if ~strcmp(deviceName, 'Thalmic MyoBand (IMU)')
-            tempData = event.Data;
-            allData = [allData; tempData];
-            timeStamps = [timeStamps; event.TimeStamps];
-    else
+            
+    
+    if strcmp(deviceName, 'Thalmic MyoBand (IMU)') 
         tempData = event.Data;
         allData = [allData; tempData];
         timeStamps = event.TimeStamps;
+    elseif strcmp(deviceName, 'Thalmic MyoBand') || strcmp(deviceName, 'Thalmic MyoBand (Quat incl. Real-time)')
+        tempData = event.Data;
+        allData = [allData; tempData];
+        timeStamps = (1:length(allData)) * (1/sF);
+    else
+        tempData = event.Data;
+        allData = [allData; tempData];
+        timeStamps = [timeStamps; event.TimeStamps];
     end
-    
+        
     if isfield(event, 'IMU')
         tempIMU = event.IMU;
         allDataIMU = [allDataIMU; tempIMU];
@@ -100,6 +109,7 @@ function RecordingSession_ShowData(src, event)
 
     
     %% Status bar update
+    
     if handles.fast 
         if strcmp(ComPortType,'NI')
             % NI DAQ card
@@ -111,6 +121,7 @@ function RecordingSession_ShowData(src, event)
         if strcmp(ComPortType,'NI')
             % NI DAQ card
             if handles.contraction
+%                 thisToc = recLength- ((rep-1)*(cT+rT));
                 thisToc = timeStamps(end) - ((rep-1)*(cT+rT));
                 lastToc = cT;
             else
