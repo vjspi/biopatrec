@@ -114,6 +114,13 @@ function success = TACTest(patRecX, handlesX)
     % allowance = str2double(get(handles.tb_allowance,'String'));
     A = str2num(get(handles.tb_allowance,'String'));
     D = str2num(get(handles.tb_distance,'String'));
+    if get(handles.cb_weights, 'Value')
+        W = [1 2 3]; % Currently default
+        W_grams = [0 400 600]; % Currently default
+    end
+    if get(handles.cb_posVisualization, 'Value')
+        P = 1:reps;
+    end
     %speed = str2double(get(handles.tb_speed,'String'));
     time = str2double(get(handles.tb_time,'String'));
 
@@ -129,6 +136,8 @@ function success = TACTest(patRecX, handlesX)
     tacTest.trials      = trials;
     tacTest.nR          = reps;
     tacTest.timeOut     = timeOut;
+    % movements assuming rest is included
+    tacTest.movs        = patRec.nOuts - 1;
 
     sF                  = tacTest.sF;
     nCh                 = length(patRec.nCh);       
@@ -136,9 +145,13 @@ function success = TACTest(patRecX, handlesX)
     deviceName          = patRec.dev;
     
     % Initialize result tables
-    allCompletionTime = zeros(tacTest.trials,tacTest.nR);
-    allSelectionTime = zeros(tacTest.trials,tacTest.nR);
-    allSelectionTimeA = zeros(tacTest.trials,tacTest.nR);
+    allCompletionTime = zeros(tacTest.trials,tacTest.nR,tacTest.movs);      %% ############## CONTINUe
+    allSelectionTime = zeros(tacTest.trials,tacTest.nR, tacTest.movs);    
+    allSelectionTimeA = zeros(tacTest.trials,tacTest.nR, tacTest.movs);
+    allPathEfficiency = zeros(tacTest.trials,tacTest.nR, tacTest.movs);
+    allDistance = zeros(tacTest.trials,tacTest.nR, tacTest.movs);    
+    allWeights = zeros(tacTest.trials,tacTest.nR, tacTest.movs);    
+    allPositions = zeros(tacTest.trials,tacTest.nR, tacTest.movs);    
     
     % Get sampling time
     sT = tacTest.timeOut;
@@ -201,8 +214,14 @@ function success = TACTest(patRecX, handlesX)
 
 
     %% Check for multiple algorithms - Assumes 2 algorithms with naming convention "_Old" (1) and "_New" (2)
+    movs = (patRec.nOuts-1);
+    P_map = zeros(trials, reps, movs);      % In format t,r,i (trial, rep, index) 
+
     if isfield(patRec, 'patRecAug')
-        
+        % Testing:  trial = Alg/Weight, reps: 1 to include all hand motions (in random positions)       
+        P = patRec.pos.idx;
+                      
+        %Randomization Algorithm
         handles.namesAlg = {'patRecTrained_Old'; 'patRecTrained_New'};
         %Create randomized order of usage of algorithms
         indexOrderAlg = zeros(trials,1);
@@ -215,19 +234,57 @@ function success = TACTest(patRecX, handlesX)
             end
         end
         handles.indexOrderAlg = indexOrderAlg;
+        
+        % Create weight entry for each algorithm - can be randomized
+        W = repelem(W, 2);
+        
+        % find(indevOrderAlg = 1); #####################
+        
+        for k = 1:2
+            idx = find(indexOrderAlg == k);
+            for ii = 1:(patRec.nOuts-1)
+                p_temp = P(randperm(length(P)));
+                P_map(idx,1,ii) = p_temp;        % Assuming only one rep per trial
+            end             
+        end        
+      
+    else
+        % Randomize weights (each trial one weight)
+        W = W(randperm(length(W)));
+        
+%         p_temp = P;
+        for tt=1:trials
+            for rr = 1:reps
+                P_map(tt,rr,1:movs) = P(rr);
+            end
+        end
+      
     end
     
     %Run through all the trials
     for t = 1 : trials
         
-        % Choose the algorithm
-        if handles.indexOrderAlg(t) == 1
-            patRec.patRecTrained = patRec.patRecAug.patRecTrained_Old;
-        else % if equals 2
-            patRec.patRecTrained = patRec.patRecAug.patRecTrained_New;
+        
+        % One trial series equal to one weight -> change
+        weight = W_grams(W(t));  %Vector already previously randomized
+        f = figure;
+        weightStr = strcat('Add Weigth: ', num2str(weight), 'g.');
+        text = uicontrol(f, 'Style', 'text', 'String', weightStr, 'Position', [40 40 500 80], 'FontSize', 22.0);
+        h = uicontrol(f,'Position', [40 20 200 40], 'String', 'Continue', ...
+                      'Callback', 'uiresume(gcbf)');
+        uiwait(gcf);
+        disp(strcat('Started trial ', num2str(t)));
+        close(f);
+        
+        % Choose the algorithm (if available)
+        if isfield(patRec, 'patRecAug')
+            if handles.indexOrderAlg(t) == 1
+                patRec.patRecTrained = patRec.patRecAug.patRecTrained_Old;
+            else % if equals 2
+                patRec.patRecTrained = patRec.patRecAug.patRecTrained_New;
+            end
+            patRec.selAlgorithm = handles.indexOrderAlg(t);
         end
-          
-        patRec.selAlgorithm = handles.indexOrderAlg(t);
         
         %Create a random order for the wanted movements.
         indexOrder = GetMovementCombination(handles.dofs,patRec.nOuts-1);
@@ -237,23 +294,15 @@ function success = TACTest(patRecX, handlesX)
         rp = randperm(length(D));
         D = D(rp);
         A = A(rp);
-            
+        
+                    
         for r = 1 : reps
             set(handles.txt_status,'String',sprintf('Trial: %d , Rep: %d.',t,r));
             
-            % Show Position for desired repetition
-            if get(handles.cb_posVisualization, 'Value')
-                backgroundImage2 = importdata(strcat('../Img/Positions/Pos', num2str(r) ,'.jpg'));
-                %select the axes
-                axes(handles.axes_image);
-                %place image onto the axes
-                image(backgroundImage2);
-                %remove the axis tick marks
-                axis off
-            end
 
             %Loop through all of the movements
             for i = 1 : size(indexOrder,1)
+               
                 completionTime = NaN;
                 selectionTime = NaN;
                 selectionTimeA = NaN;
@@ -308,9 +357,20 @@ function success = TACTest(patRecX, handlesX)
 
                 %Get all random movements for this set of movements.
                 index = indexOrder(i,:);
+                
+                % Show position for desired repetition
+                if get(handles.cb_posVisualization, 'Value')
+                    backgroundImage2 = importdata(strcat('../Img/Positions/Pos', num2str(P_map(t,r,index)) ,'.jpg'));
+                    %select the axes
+                    axes(handles.axes_image);
+                    %place image onto the axes
+                    image(backgroundImage2);
+                    %remove the axis tick marks
+                    axis off
+                end
 
                 set(handles.txt_status,'String','Wait!');
-                pause(2);
+                pause(3);
                 name = 'Wanted: ';
                 
                 %distance = randi(5,1) * 15 + 50;
@@ -328,7 +388,7 @@ function success = TACTest(patRecX, handlesX)
                     listOfMovements = handles.movList;
                     movement = listOfMovements(movementIndex);
                     name = strcat(name,movement.name,',');
-                    printName = strcat(printName,upper(movement.name{1}(regexp(movement.name{1}, '\<.'))),',');
+                        printName = strcat(printName,upper(movement.name{1}(regexp(movement.name{1}, '\<.'))),',');
                     for temp_index = 1:distance
                         VREActivation(com, 1, [], movement.idVRE, movement.vreDir, 1);
                         if (handles.SMCtestEnabled) %&& (mod(temp_index,handles.SMCTargetStep) == 0)% if SMC test
@@ -453,12 +513,16 @@ function success = TACTest(patRecX, handlesX)
 
                 %Save the data to the trialResult in each trial, repetitition
                 %and movement.
-                tacTest.trialResult(t,r,i) = test;
+                tacTest.trialResult(t,r,index) = test;
                 
-                allCompletionTime(t,r,i) = completionTime;
-                allSelectionTime(t,r,i) = selectionTime;
-                allSelectionTimeA(t,r,i) = selectionTimeA;
-                allDistance(t,r,i) = distance;
+                allCompletionTime(t,r,index) = completionTime;
+                allSelectionTime(t,r,index) = selectionTime;
+                allSelectionTimeA(t,r,index) = selectionTimeA;
+                allPathEfficiency(t,r,index) = test.pathEfficiency;
+                allDistance(t,r,index) = distance;
+                allWeights(t,r,index) = weight;
+                allPositions(t,r,index) = P_map(t,r,index);
+                
 %                 allFail(t,r) = isnan(completionTime);
                 
                 allFeat = cat(3, allFeat, dataTW);
@@ -474,27 +538,70 @@ function success = TACTest(patRecX, handlesX)
                 
             end
         end
+        
     end
 
     tacTest.tableResults.allCompletionTime = allCompletionTime;
     tacTest.tableResults.allSelectionTime = allSelectionTime;
+    tacTest.tableResults.allPathEfficiency = allPathEfficiency;
+    tacTest.tableResults.allSelectionTimeA = allSelectionTimeA;
     tacTest.ssTracker = TrackStateSpace('read');
     
     tacTest.tdata = allFeat;
     tacTest.idata = allFeatIMU;
     tacTest.labels = allMov;
     
-
-    % Save test
-    [filename, pathname] = uiputfile({'*.mat','MAT-files (*.mat)'},'Save as', 'Untitled.mat');
-    if isequal(filename,0) || isequal(pathname,0)
-       disp('User pressed cancel')
-    else
-        save([pathname,filename],'tacTest');    
+    tacTest.distances = allDistance;
+    tacTest.weights = allWeights;
+    tacTest.positions = allPositions;
+    
+     % Save test
+     tacTest = TacTestResults(tacTest);
+    
+    if exist('indexOrderAlg', 'var')
+         tacTest.algorithm = indexOrderAlg;
     end
+    
+    
+    % User centered saving - uncomment for usage
+    % Save test
+%     [filename, pathname] = uiputfile({'*.mat','MAT-files (*.mat)'},'Save as', 'Untitled.mat');
+%     if isequal(filename,0) || isequal(pathname,0)
+%        disp('User pressed cancel');
+%     else
+%         save([pathname,filename],'tacTest');    
+%     end
 
+    
+    % Save familiarization set 
+    if ~isfield(patRec, 'patRecAug')     
+        pathname = uigetdir;
+        if isequal(pathname,0)
+            pathname = 'C:\Users\spieker\LRZ Sync+Share\MasterThesis\BackupFiles';
+        end
+        if ~isfile([pathname,'\fam_tacTest1'])
+            save([pathname,'\fam_tacTest1'],'tacTest'); 
+        else
+            files = dir([pathname, '\fam_tacTest*']);
+             no = str2num(files(end).name(end-4))+1;
+            save([pathname,'\fam_tacTest',  num2str(no)],'tacTest'); 
+        end
+    % Save testing set
+    else
+        pathname = uigetdir;
+        if isequal(pathname,0)
+            pathname = 'C:\Users\spieker\LRZ Sync+Share\MasterThesis\BackupFiles';
+        end
+         if ~isfile([pathname,'\test_tacTest1'])
+            save([pathname,'\test_tacTest1'],'tacTest'); 
+        else
+            files = dir([pathname, '\test_tacTest*']);
+            no = str2num(files(end).name(end-4))+1;
+            save([pathname,'\test_tacTest',  num2str(no)],'tacTest'); 
+        end
+    end
     %Display results
-    tacTest = TacTestResults(tacTest);
+%     tacTest = TacTestResults(tacTest);
 end
 
 
