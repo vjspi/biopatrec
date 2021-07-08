@@ -198,6 +198,7 @@ end
 
 % Number of samples that are going to be added for training
 nSAdd_preProc = zeros(nP,nM);  
+idxNoAdaptAvailable = [];
 
 % Initialization for P
 nSAdd_postProc = zeros(nP,nM);
@@ -261,6 +262,7 @@ if ~isempty(idxAdapt)
                  trFeatFam_Sel = [trFeatFam_Sel; trFeatFam(ind_postProc{j},:)];       % Selected feature vector
              else
                  disp(strcat('### NO DATA ADAPTATION  for Pos ', num2str(idxAdapt(j,1)), ' mov ', num2str(idxAdapt(j,2)), '! ###'));
+                 idxNoAdaptAvailable =  [idxNoAdaptAvailable, idxAdapt(j,:)];
              end
              
         end
@@ -328,6 +330,7 @@ patRec.patRecAug.nSAdd = nSAdd_preProc;
 patRec.patRecAug.nSAdd_postProc = nSAdd_postProc;
 patRec.patRecAug.nSAddAll = nSAddAll;
 patRec.patRecAug.nSMajVote = nSMajVote;
+patRec.patRecAug.idxNoAdaptAvailable = idxNoAdaptAvailable;
 patRec.patRecAug.accThreshold = patRecCal.accThreshold;  %%%%%%%%%%%%%% Adjust!
     
 end
