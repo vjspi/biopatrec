@@ -29,17 +29,24 @@
 
 function AdaptiveLearner_fam2test()
 
-close all;
+close all;  
 clear all;
 
-% path = uigetdir;
-path = 'C:\Users\spieker\LRZ Sync+Share\MasterThesis\20_Coding\DataSets\28_Lorenzo';
-fileAdapt = 'fam_tacTest';
+path = uigetdir;
+% path = 'C:\Users\spieker\LRZ Sync+Share\MasterThesis\20_Coding\DataSets\30_MultiPosVisualization';
+fileAdapt = 'fam_tacTest1';
 
 load([path,'\',fileAdapt], 'tacTest');
 handles.patRec = tacTest.patRec;
 alg = 'Discriminant A.';
 % set(button, 'String', 'Wait');
+
+%% Check if familiarization condition is fulfilled
+compRateMean = mean(tacTest.compRate);
+if compRateMean < 0.6
+    errordlg('Minimum completion rate not achieved','Error');
+end
+
 
 %% ######################### TESTING ###################################### 
 
@@ -53,7 +60,7 @@ handles.fam.tacTest = tacTest;
 nSMajVote = 5;
 [patRecAdapted, handles] = AugmentPatRec(handles, alg, nSMajVote);
 
-%Show how many samples were added
+%Show how many samples were addedcl
 disp('Added samples:');
 disp(patRecAdapted.patRecAug.nSAddAll);
 disp('---------------');
@@ -73,8 +80,8 @@ GUI_TestPatRec_Mov2Mov('pb_socketDisconnect_Callback', RealTimeFigure, [], RealT
 GUI_TestPatRec_Mov2Mov('pb_socketConnect_Callback', RealTimeFigure, [], RealTimeHandles);
 
 % Do TAC Test
-TacValues_Test.nTrials = 4; % three trials with different weight each
-TacValues_Test.nRep = 3; % for different position each
+TacValues_Test.nTrials = 6; % three trials for each algorithm with different weight each
+TacValues_Test.nRep = 1; % one run using different positons
 TacValues_Test.testTime= 15;  % in seconds
 TacValues_Test.allowance = 8;  % in degrees
 TacValues_Test.distance = 60;  % in degrees -> could be a vector such as [10 20 30] - then allowance need to be the same

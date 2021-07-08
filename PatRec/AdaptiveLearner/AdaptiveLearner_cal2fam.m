@@ -29,11 +29,11 @@
 
 function AdaptiveLearner_cal2fam()
 
-% path = uigetdir;
+path = uigetdir;
 file = 'cal';
 fileAdapt = 'fam_tacTest';
-% path = 'C:\Users\spieker\LRZ Sync+Share\MasterThesis\20_Coding\DataSets\28_Lorenzo';
-[file, path] = uigetfile({'*.mat';'*.csv'});
+% path = 'C:\Users\spieker\LRZ Sync+Share\MasterThesis\20_Coding\DataSets\30_MultiPosVisualization';
+% [file, path] = uigetfile({'*.mat';'*.csv'});
 load([path,'\',file]);
 % set(button, 'String', 'Wait');
 progress = waitbar(0,'PreProcessing');
@@ -280,6 +280,8 @@ end
 
 % patRec = OfflinePatRec(sigFeatures, selFeatures, randFeatures, normSets, alg, tType, algConf, movMix, topology, confMatFlag, featReducAlg, posPerfFlag);
 handles.patRec = bestPatRec;
+waitbar(1.0,progress,'Trained');
+close(progress);
 % Load patRec
 RealTimeFigure = Load_patRec(handles.patRec, 'GUI_TestPatRec_Mov2Mov',1);
 RealTimeHandles = guidata(RealTimeFigure);

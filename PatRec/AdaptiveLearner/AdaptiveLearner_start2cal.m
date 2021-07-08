@@ -35,12 +35,12 @@ handles_RecSes = guidata(gui_RecSes);
 eventdata = [];
 
 % Recording Parameters
-% set(handles_RecSes.et_Nr, 'String', '3');
-% set(handles_RecSes.et_Tc, 'String', '10');
-% set(handles_RecSes.et_Tr, 'String', '5');
-set(handles_RecSes.et_Nr, 'String', '1');
-set(handles_RecSes.et_Tc, 'String', '1');
-set(handles_RecSes.et_Tr, 'String', '1');
+set(handles_RecSes.et_Nr, 'String', '3');
+set(handles_RecSes.et_Tc, 'String', '10');
+set(handles_RecSes.et_Tr, 'String', '5');
+% set(handles_RecSes.et_Nr, 'String', '1');
+% set(handles_RecSes.et_Tc, 'String', '1');
+% set(handles_RecSes.et_Tr, 'String', '1');
 
 set(handles_RecSes.et_msg, 'Value', [1 2 5 6 7 8]);         % Hand motions: OH, CH, P, S, PG, Rest
 
