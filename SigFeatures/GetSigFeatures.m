@@ -533,3 +533,30 @@ function pF = GetSigFeatures_itmn_gyr(pF)
     pF.f.itmn_gyr =  mean(pF.idata(:,8:10));
 end
 
+function pF = GetSigFeatures_itmn_eul(pF)
+% 2021-07-07 Veronika Spieker / Creation to process IMU Data from Myo Band
+    quat_temp = mean(pF.idata(:,1:4));
+    pF.f.itmn_eul = quat2eul(quat_temp);
+end
+
+function pF = GetSigFeatures_itmn_eulZ(pF)
+% 2021-07-07 Veronika Spieker / Creation to process IMU Data from Myo Band
+    quat_temp = mean(pF.idata(:,1:4));
+    eul_temp = quat2eul(quat_temp);
+    pF.f.itmn_eulZ = eul_temp(1);
+end
+
+function pF = GetSigFeatures_itmn_eulY(pF)
+% 2021-07-07 Veronika Spieker / Creation to process IMU Data from Myo Band
+    quat_temp = mean(pF.idata(:,1:4));
+    eul_temp = quat2eul(quat_temp);
+    pF.f.itmn_eulY = eul_temp(2);
+end
+
+function pF = GetSigFeatures_itmn_eulX(pF)
+% 2021-07-07 Veronika Spieker / Creation to process IMU Data from Myo Band
+    quat_temp = mean(pF.idata(:,1:4));
+    eul_temp = quat2eul(quat_temp);
+    pF.f.itmn_eulX = eul_temp(3);
+end
+

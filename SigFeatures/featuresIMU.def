@@ -17,9 +17,7 @@ fwl	% Freq: wave length
 fmn	% Freq: mean
 fmd	% Freq: median
 itmn_quat % Time: Mean value for IMU quaternions
-
-
-
+itmn_eulX  % Time: Mean value for IMU quaternions transformed into Euler angles (Z)
 
 NOTE: Not all features are used constantly so
 some of them are left out to improve speed
@@ -64,3 +62,7 @@ IMU:
 itmn_quat % Time: Mean value for IMU quaternions
 itmn_acc % Time: Mean value for IMU acceleration
 itmn_gyr % Time: Mean value for IMU gyroscope
+itmn_eul  % Time: Mean value for IMU quaternions transformed into Euler angles (all in ZYX order)
+itmn_eulX  % Time: Mean value for IMU quaternions transformed into Euler angles (X)
+itmn_eulY  % Time: Mean value for IMU quaternions transformed into Euler angles (Y)
+itmn_eulZ  % Time: Mean value for IMU quaternions transformed into Euler angles (Z)
