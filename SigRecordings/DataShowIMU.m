@@ -108,7 +108,15 @@ function DataShowIMU(handles,cdata, idata, sF, sT)
         set(handles.a_i0,'YTickLabel',piName);
         ylim(handles.a_i0, [-pi pi]);
         xlim(handles.a_i0, [0 xmax]);
-        legend(handles.a_i0, 'x', 'y', 'z');
+        legend(handles.a_i0, 'z', 'y', 'x');
+        
+        
+%         % For debugging purposese
+%         f = figure;
+%         plot(idata(:,1:4));
+%         legend('w', 'x', 'y', 'z');
+        
+     
     else
         % do nothing
     end
