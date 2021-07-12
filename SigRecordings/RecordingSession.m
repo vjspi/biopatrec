@@ -140,6 +140,19 @@ if isfield(afeSettings,'multiPos')
     handles.multiPosIdx = [1 1 2 3 1];
     handles.multiPosSeg = cT/length(handles.multiPosIdx);
     
+%    for i  = 1:3
+%        fileNamePos = ['Img/Positions/Pos' num2str(i) '.jpg'];
+%        posImages{i}= importdata(fileNamePos);  
+%     end   
+    
+    for i  = 1:3
+        for j = 1:length(mov)
+            fileNamePos = ['Img/Positions/Pos' num2str(i) 'Mov' num2str(j) '.jpg'];    
+            posImages{i,j}= importdata(fileNamePos);  
+        end
+    end
+    
+    
 %     for k = 1:3
 %         fileNamePos = ['Img/Positions/Pos' num2str(k) '.jpg'];
 %         if ~exist(fileNamePos,'file')
@@ -467,21 +480,31 @@ while ex <= nM
             % show position
             if handles.multiPos
                    
-                for i  = 1:length(handles.multiPosIdx)
-                    startPosTic = tic;
-                    disp(num2str(handles.multiPosIdx(i)));
-                    fileNamePos = ['Img/Positions/Pos' num2str(handles.multiPosIdx(i)) '.jpg'];       
-                    posI = importdata(fileNamePos);   
-                    pos_pic = image(posI,'Parent',handles.a_effortPlot); 
-                    axis(handles.a_effortPlot,'off');    
-                    pause(handles.multiPosSeg);
+                for i= 1:length(handles.multiPosIdx)
+                    
+                    idx = handles.multiPosIdx(i);
+                    disp(idx);
+%                     fileNamePos = ['Img/Positions/Pos' num2str(handles.multiPosIdx(i)) '.jpg'];    
+                    pos_pic = image(posImages{idx,ex},'Parent',handles.a_effortPlot); 
+                    axis(handles.a_effortPlot,'off');  
+                    
+                    if i==1
+                        pause(handles.multiPosSeg - toc(startContractionTic));
+                        startPosTic = tic;
+                    else
+                        pause(handles.multiPosSeg-toc(startPosTic));
+                        clear startPosTic;
+                        startPosTic = tic;
+                    end
                 end
+                clear startPosTic;
                
             else 
                 pause(cT - toc(startContractionTic));
             end
 
             % Relax
+            
             set(handles.t_msg,'String','Relax');
             startRelaxingTic = tic;
             if trainWithVr
@@ -492,6 +515,8 @@ while ex <= nM
             pic = image(relax,'Parent',handles.a_pic);                 % set image
             axis(handles.a_pic,'off');                                 % Remove axis tick marks
             set(handles.a_effortPlot,'visible','off');
+            rest_pic = image(posImages{idx,6},'Parent',handles.a_effortPlot); 
+            axis(handles.a_effortPlot,'off');  
             handles.contraction = 0;
             pause(rT - toc(startRelaxingTic));
         end
@@ -506,6 +531,7 @@ while ex <= nM
         SetDeviceStartAcquisition(handles, obj);
         
         for rep = 1 : nR
+            
             
             rep
             handles.rep = rep;
