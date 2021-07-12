@@ -360,7 +360,7 @@ function success = TACTest(patRecX, handlesX)
                 
                 % Show position for desired repetition
                 if get(handles.cb_posVisualization, 'Value')
-                    backgroundImage2 = importdata(strcat('../Img/Positions/Pos', num2str(P_map(t,r,index)) ,'.jpg'));
+                    backgroundImage2 = importdata(strcat('C:\Users\spieker\LRZ Sync+Share\MasterThesis\biopatrec\Img\Positions\Pos', num2str(P_map(t,r,index)) ,'.jpg'));
                     %select the axes
                     axes(handles.axes_image);
                     %place image onto the axes
