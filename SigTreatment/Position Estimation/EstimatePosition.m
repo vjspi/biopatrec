@@ -66,7 +66,7 @@ function sigFeatures = EstimatePosition(posDef, sigFeatures)
             %Quaternions
             allPosQuat(iNb, iMov, :) = allFeatures(iNb, iMov).itmn_quat;
             % Euler
-            allPosEuler(iNb, iMov, :) = quat2eul(allFeatures(iNb, iMov).itmn_quat); % XYZ rotation
+            allPosEuler(iNb, iMov, :) = quat2eul(allFeatures(iNb, iMov).itmn_quat, 'ZYX'); % XYZ rotation
             
             % Taking y orientation
             for iPos = 1:nPos
