@@ -78,9 +78,11 @@ accPos(isnan(accPos))=0;  % Replace NaN values -> this way the not available pos
 % Identify minimum specifity (to ensure that classifier fulfills minimum
 % certainty of providing TP rather than FP)
 iMinSpec = [];
-for i = 1:length(idxUnderRep)
-    if specThreshold <= specificity(idxUnderRep(i,2), idxUnderRep(i,1))
-        iMinSpec = [iMinSpec, i];
+if ~isempty(idxUnderRep)
+    for i = 1:size(idxUnderRep,1)
+        if specThreshold <= specificity(idxUnderRep(i,2), idxUnderRep(i,1))
+            iMinSpec = [iMinSpec, i];
+        end
     end
 end
 
