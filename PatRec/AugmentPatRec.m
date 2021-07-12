@@ -166,6 +166,7 @@ elseif isfield(handles.fam, 'tacTest')
     
     trImuFam = zeros(nW, nImu);         % Initialization of IMU Features
     outPos = zeros(nW, 1);
+    outWeight = zeros(nW, 1);
        
     % Position estimation
     for i = 1:nW
@@ -175,6 +176,7 @@ elseif isfield(handles.fam, 'tacTest')
     
     % Motion estimation (already during TAC Test)
     outMov = famTacTest.labels';
+    outWeight = famTacTest.labelsWeight';
 
 else 
        disp('### NO VALID FAMILIARIZATION SET ! ###')
@@ -187,6 +189,7 @@ idxFamPhase = [outPos, outMov];
 
 trFeatFam_Sel = [];
 trOutFam_Sel = [];
+trOutWeight_Sel = [];
 
 % Total number of samples available from data set
 nSTot = zeros(nP,nM);   
@@ -269,11 +272,13 @@ if ~isempty(idxAdapt)
         
         % Stack the Output vector of desired samples
         tempOut = outMov(ind_postProc{j});
+        tempWeight = outWeight(ind_postProc{j});
         tempOutMask = zeros(length(tempOut),nM);
         for k = 1:length(tempOut) 
             tempOutMask(k, tempOut(k)) = 1; 
         end 
         trOutFam_Sel = [trOutFam_Sel; tempOutMask];                 % Selected out vector
+        trOutWeight_Sel = [trOutWeight_Sel; tempWeight];
     end
 else
     disp('### NO DATA ADAPTATION (no underrepresented samples) ! ###')
@@ -324,6 +329,12 @@ patRec.patRecAug.patRecTrained_Old = patRecCal.patRecTrained;
 patRec.patRecAug.performance_Old = patRecCal.performance;
 patRec.patRecAug.patRecTrained_New= patRecTrained_New;
 patRec.patRecAug.performance_New = performance_New;
+patRec.patRecAug.SetsAdd.trFeat = trFeatFam_Sel;
+patRec.patRecAug.SetsAdd.trOut= trOutFam_Sel;
+patRec.patRecAug.SetsAdd.trWeight= trOutWeight_Sel;
+
+
+
 
 patRec.patRecAug.nSTot = nSTot;
 patRec.patRecAug.nSAdd = nSAdd_preProc;

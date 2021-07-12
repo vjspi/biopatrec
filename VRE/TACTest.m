@@ -100,7 +100,8 @@ function success = TACTest(patRecX, handlesX)
     global allFeat; 
     global allFeatIMU;
     global allMov;
-    allFeat = []; allFeatIMU = []; allMov = [];
+    global allFeatWeight;
+    allFeat = []; allFeatIMU = []; allMov = []; allFeatWeight = [];
     
    
     
@@ -528,6 +529,8 @@ function success = TACTest(patRecX, handlesX)
                 allFeat = cat(3, allFeat, dataTW);
                 allFeatIMU = cat(3, allFeatIMU, iDataTW);
                 allMov = cat(2, allMov, movTW);
+                featWeightTemp = weight * ones(1,size(dataTW,3));
+                allFeatWeight = [allFeatWeight, featWeightTemp];
 
                 tempData = [];
                 if (handles.SMCtestEnabled) % show green hand for confirmation
@@ -550,6 +553,7 @@ function success = TACTest(patRecX, handlesX)
     tacTest.tdata = allFeat;
     tacTest.idata = allFeatIMU;
     tacTest.labels = allMov;
+    tacTest.labelsWeight = allFeatWeight;
     
     tacTest.distances = allDistance;
     tacTest.weights = allWeights;
