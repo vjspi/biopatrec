@@ -26,7 +26,7 @@
 % [Contributors are welcome to add their email]
 % 2021-06-14 / Veronika Spieker
 
-function [accPos, accTruePos, idxAdapt] = PositionPerformance_Analysis(patRec, performancePos, accThreshold, specThreshold, confMatAll, confMatPos, confMatFlag)
+function [accPos, accTruePos, idxAdapt] = PositionPerformance_Analysis(patRec, performancePos, accThreshold, precThreshold, confMatAll, confMatPos, confMatFlag)
 
 nM      = size(patRec.mov,1);     
 pos = patRec.pos.idx;
@@ -61,6 +61,7 @@ for p = 1:length(performancePos)
     accPos(:,p) = performancePos{p}.acc;
     accTruePos(:,p) =  performancePos{p}.accTrue;
     specificity(:,p) = performancePos{p}.specificity;
+    precision(:,p) = performancePos{p}.precision;
 end
 
 f = figure;
@@ -75,12 +76,12 @@ accPos(isnan(accPos))=0;  % Replace NaN values -> this way the not available pos
 % Find underrepresented hand motions in poses
 [idxUnderRep(:,2), idxUnderRep(:,1)] = find(accPos < accThreshold);
 
-% Identify minimum specifity (to ensure that classifier fulfills minimum
+% Identify minimum precision (to ensure that classifier fulfills minimum
 % certainty of providing TP rather than FP)
 iMinSpec = [];
 if ~isempty(idxUnderRep)
     for i = 1:size(idxUnderRep,1)
-        if specThreshold <= specificity(idxUnderRep(i,2), idxUnderRep(i,1))
+        if precThreshold <= precision(idxUnderRep(i,2), idxUnderRep(i,1))
             iMinSpec = [iMinSpec, i];
         end
     end
