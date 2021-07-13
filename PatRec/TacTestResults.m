@@ -1,14 +1,14 @@
 % ---------------------------- Copyright Notice ---------------------------
-% This file is part of BioPatRec © which is open and free software under 
+% This file is part of BioPatRec ? which is open and free software under 
 % the GNU Lesser General Public License (LGPL). See the file "LICENSE" for 
 % the full license governing this code and copyrights.
 %
 % BioPatRec was initially developed by Max J. Ortiz C. at Integrum AB and 
-% Chalmers University of Technology. All authors’ contributions must be kept
+% Chalmers University of Technology. All authors? contributions must be kept
 % acknowledged below in the section "Updates % Contributors". 
 %
 % Would you like to contribute to science and sum efforts to improve 
-% amputees’ quality of life? Join this project! or, send your comments to:
+% amputees? quality of life? Join this project! or, send your comments to:
 % maxo@chalmers.se.
 %
 % The entire copyright notice must be kept in this or any source file 
@@ -47,6 +47,12 @@ for t = 1 : tacTest.trials
     end
 end
 
+% Save the completion rate to divide later
+if isfield(tacTest, 'algorithm')
+    nSucctTemp = nSucct;
+end
+
+
 %Save the first repetition of selectionTime and compTime.
 selectionTime1 = zeros(size(selectionTime));
 selectionTime1 = selectionTime(1:tacTest.nR,1:tacTest.combinations);
@@ -67,6 +73,7 @@ if tacTest.trials > 1
             end
         end
     end
+    
     nSucct(2:end,:) = [];
     
     for i = 1:tacTest.combinations
@@ -101,6 +108,27 @@ tacTest.compTime        = compTime;
 tacTest.pathEfficiency  = pathEfficiency;
 tacTest.movements       = movements;
 
+
+%% Separate per algorithm
+if isfield(tacTest, 'algorithm')
+        % Split according to algoithm
+        idx{1} = find(tacTest.algorithm == 1);
+        idx{2} = find(tacTest.algorithm == 2);
+
+    for i = 1:length(idx)
+  
+        tacTest.algResults.compTime{i}     = tacTest.compTime(idx{i},:);
+        tacTest.algResults.pathEfficiency{i}= tacTest.pathEfficiency(idx{i},:);    
+        
+        % Summing up only valid for 1DOF!
+        tacTest.algResults.comp{i} = sum(nSucctTemp(idx{i},:),1);
+        
+        compRate = tacTest.algResults.comp{i} ./ (tacTest.nR*length(idx{i}));
+        tacTest.algResults.compRate{i} = compRate;
+%         tacTest.algResults.algCompTime{i} =tacTest.tableResults.allCompletionTime(idx{i},:,:);
+%         tacTest.algResults.algPathEfficiency{i} = tacTest.tableResults.algPathEfficiency(idx{i},:,:);
+    end
+end
 %% plot and save results
 % Completion rate
 figure();

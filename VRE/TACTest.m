@@ -559,13 +559,13 @@ function success = TACTest(patRecX, handlesX)
     tacTest.weights = allWeights;
     tacTest.positions = allPositions;
     
-     % Save test
-     tacTest = TacTestResults(tacTest);
-    
+  
     if exist('indexOrderAlg', 'var')
          tacTest.algorithm = indexOrderAlg;
     end
     
+     % Save test
+     tacTest = TacTestResults(tacTest);
     
     % User centered saving - uncomment for usage
     % Save test
