@@ -118,7 +118,8 @@ if isfield(tacTest, 'algorithm')
     for i = 1:length(idx)
   
         tacTest.algResults.compTime{i}     = tacTest.compTime(idx{i},:);
-        tacTest.algResults.pathEfficiency{i}= tacTest.pathEfficiency(idx{i},:);    
+        tacTest.algResults.pathEfficiency{i}= tacTest.pathEfficiency(idx{i},:);  
+        tacTest.algResults.selectionTime{i}= tacTest.selectionTime(idx{i},:);
         
         % Summing up only valid for 1DOF!
         tacTest.algResults.comp{i} = sum(nSucctTemp(idx{i},:),1);
