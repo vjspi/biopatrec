@@ -14,21 +14,30 @@ BioPatRec's original documentation and instruction can be found here: https://gi
 Adjustments were made within the same structure.
 
 This forked repository (vjspi/biopatrec) extends the BioPatRec platform in two ways:
-1. Integration of IMU data using a Myo Armband (Signal Recording Module)
+1. Integration of IMU data using a Myo Armband (Signal Recording/Signal Treatment/Feature Extraction Module)
 2. Integration of an adaptive learner (Pattern Recognition Module)
 
-## IMU Recording
+## IMU Data
+### IMU Recording
 IMU sampling is included as new communication protocol in the Comm/Myoband folder and is linked to the selected device name in the Analog Front-End Selection (_GUI_AFEselection_)
 
 Added options are:
 1. Thalmic MyoBand (IMU) - uses the MyoBandSession_Mex file (based on https://github.com/mark-toma/MyoMex.git)
 2. Thalmic MyoBand (Quat incl. real-time) - uses the MyoBandSession_IMU.m (based on MyoBandSession.m) - **recommended**
 
-The first option allows the capture of all sampled IMU data points, while the second only stores the average of the current sample window set in the Recordings GUI (e.g. if the sample window is set to 0.5 s and the EMG sampling frequency is 200 Hz, ten data points are stored for EMG and the IMU value is averaged over this time period because the IMU is provided less frequently and without a reliable time stamp). Because the latter allows real-time usage relevant for later online usage, Thalmic MyoBand (Quat incl. real-time) is the recommended option for this purpose.
+The first option allows the capture of all sampled IMU data points, while the second only stores the average of the current sample window set in the Recordings GUI (e.g. if the sample window is set to 0.5 s and the EMG sampling frequency is 200 Hz, ten data points are stored for EMG and the IMU value is averaged over this time period because the IMU is provided less frequently and without a reliable time stamp). Thalmic MyoBand (Quat incl. real-time) is the recommended option for this purpose because it allows real-time usage relevant for later online usage, 
 
 ![grafik](https://user-images.githubusercontent.com/80716904/134916102-92689f5b-67a9-42e2-afce-b0c13b24e739.png)
 
+### IMU Feature Extraction
+Generation of IMU features is included in the Signal Treatment module. If IMU data is detected, the _Position Estimation_ option is activated and can be selected. Predefined functions (here classification of y rotation into three segments, see paper) allows the generation of IMU labels. Different interpretations can be added by adjusting _GUI_SignalTreatment_ and extending the definitions of the position estimation function (SigTreatment/Position Estimation/EstimatePosition.m). 
+
+Within the PatRec interface, the generated IMU features (according to _SigFeatures/featuresIMU.def_) can then be selected for further processing.
+
+![grafik](https://user-images.githubusercontent.com/80716904/134928772-c84da526-f340-4538-8872-f0c024551185.png)
+
 ## Adaptive learner
+
 
 ## Running the script
 
