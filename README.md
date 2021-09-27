@@ -4,7 +4,7 @@ Paper Title:
 
 Journal: 
 
-Authors:
+Authors: Veronika Joanna Spieker, Amartya Ganguly, Cristina Piazza, and Sami Haddadin
 
 
 # Repository overview
