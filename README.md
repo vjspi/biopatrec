@@ -1,7 +1,9 @@
 # Multi-modal Adaptive Learner for Hand Motion Classification
 
 Paper Title:
-Jounal: 
+
+Journal: 
+
 Authors:
 
 
@@ -27,11 +29,18 @@ The first option allows the capture of all sampled IMU data points, while the se
 ![grafik](https://user-images.githubusercontent.com/80716904/134916102-92689f5b-67a9-42e2-afce-b0c13b24e739.png)
 
 
-
-
 ## Adaptive learner
 
-## Study protocol
+## Running the script
 
+Running the experimental protocol presented in the paper, requires the consecutive execution of three scripts in PatRec/AdaptiveLearner:
+1. **AdaptiveLearner_start2cal.m**: 
+2. **AdaptiveLearner_cal2fam.m**:
+3. **AdaptiveLearner_fam2test.m**:
+
+
+Warnings: 
+- Distance between USB adapter and Myo Armband should be as minimal as possible for the experiment (otherwise connection issues might occur)
+- Restart computer or stop all processes (especially on Windows) before running the protocol to avoid unwanted interruption within the MyoBand's datastream
 
 # Cite this work
