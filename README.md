@@ -39,7 +39,7 @@ Within the PatRec interface, the generated IMU features (according to _SigFeatur
 ## Adaptive learner
 The adaptive learner is included in the PatRec module. If positonal (IMU) data is recognized a flag is stored in the data struct and leads to the inclusion of the data during offline training available in the PatRec GUI (_OfflinePatRec.mat_). _PositionPerformance_patRec_ computes the evaluation measures for each combination of limb position and hand motion. _PositionPerformance_Analysis_ evaluates the resulting measures based on predefined thresholds and marks states which do not meet these conditions.
 
-_AugmentData.mat_ (also callable from the PatRec GUI) takes samples from a second data set without hand motion labels and predicts the output based on the first model. It identfies samples for the previously misrepresented states and adapts the training set accordingly (see paper). 
+_AugmentData.mat_ (also callable from the PatRec GUI) takes samples from a second data set without hand motion labels and predicts the output based on the first model. It identfies samples for the previously misrepresented states and adapts the training set accordingly. See _AdaptiveLearner_fam2test_ and the referenced paper for the detailed data processing pipeline. 
 
 ## Running the script
 
