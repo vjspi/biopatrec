@@ -10,4 +10,4 @@ To include IMU data, _MyoClient_'s function _SampleOrientation_ is integrated in
 In view of the exclusive usage of orientation data in this work the sampling rate reduction was accepted. No further filter was applied, as the averaging already smoothened signals in between the samples.
 
 
-Similar to the EMG data handling, the IMU data buffer is stored in a global variable.  Upon222completion,  both  data  sets  were  saved  and  visualized  in  the  user  interface.   For  better  physical223interpretation, orientation is converted from quaternions to Euler angles.
+Similar to the EMG data handling, the IMU data buffer is stored in a global variable.  Upon completion,  both  data  sets  were  saved  and  visualized  in  the  user  interface.   For  better  physical interpretation, orientation is converted from quaternions to Euler angles.
