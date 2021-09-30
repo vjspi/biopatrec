@@ -48,7 +48,7 @@ Running the experimental protocol presented in the paper, requires the consecuti
 2. **AdaptiveLearner_cal2fam.m**: Initiates the familiarization phase - a series of TAC tests for a predefined number of combinations. When external factors need to be changed, a window indicates the desired change and the protocol only proceeds after user confirmation. All data points recorded during the TAC tests is stored as fam.mat.
 3. **AdaptiveLearner_fam2test.m**: Initiates the testing phase. The cal.mat and fam.mat files are loaded from the selected folder and used to generate to classifier models, one only based on the _cal_ data and one based on the combined data of _cal_ and _fam_ (see paper for data selection). Both models are stores as patRecAdapted.mat and used in the automatically initiated TAC test series. Results of the testing phase are saved as test.mat.
 
-Data sets can be found here: https://github.com/vjspi/SubjectData.git
+Data sets can be found here: https://github.com/vjspi/ExperimentalEvaluation
 
 Warnings to avoid connectivity issues:
 - Distance between USB adapter and Myo Armband should be as minimal as possible for the experiment 
