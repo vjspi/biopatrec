@@ -23,7 +23,7 @@ IMU sampling is included as new communication protocol in the Comm/Myoband folde
 
 Added options are:
 1. Thalmic MyoBand (IMU) - uses the MyoBandSession_Mex file (based on https://github.com/mark-toma/MyoMex.git)
-2. Thalmic MyoBand (Quat incl. real-time) - uses the MyoBandSession_IMU.m (based on MyoBandSession.m) - **recommended**
+2. Thalmic MyoBand (Quat incl. real-time) - uses the MyoBandSessionIMU.m (explained in https://github.com/vjspi/biopatrec/tree/master/Comm/Myoband) - **recommended**
 
 The first option allows the capture of all sampled IMU data points, while the second only stores the average of the current sample window set in the Recordings GUI (e.g. if the sample window is set to 0.5 s and the EMG sampling frequency is 200 Hz, ten data points are stored for EMG and the IMU value is averaged over this time period because the IMU is provided less frequently and without a reliable time stamp). Thalmic MyoBand (Quat incl. real-time) is the recommended option for this purpose because it allows real-time usage relevant for later online usage, 
 
