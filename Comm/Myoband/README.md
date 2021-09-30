@@ -1,7 +1,10 @@
-# MyoBand Connection (EMG)
+## Explanation of MyoBandSessionIMU.m (adaptation of MyoBandSession.m)
+
+### MyoClient
+
 Thalmic Labs's software Myo Connect allows visualization of live recorded data as well as simple hand motion classifications. To process the raw information, functions accessing the data structs provided by Myo Connect can be defined in C/C++ source code. To further transfer the data in Matlab, the C/C++ source code is compiled into a Matlab Mex file. In the latest BioPatRec version (BioPatRec FRA - https://github.com/biopatrec/biopatrec/wiki/RoadMap_FRA.md), EMG data is accessed using the MyoMex file _MyoClient_ and its function _SampleEmg_. The EMG data is sampled in a separate class _MyoBandSession_ which is called when required. To avoid double use of incoming data, e.g. due to time delays, a buffer is filled with the incoming data and processed after a specified number of samples is acquired. To allow parallel signal acquisition with other tasks, a timer function in Matlab is used to execute a data at a given sampling rate. The timer stops when the desired recording length passed. In the present case, a data buffer is filled after 10 samples, corresponding to 50 ms. EMG samples are provided as values in a range of -128 to 127 for each of the 8 electrode channels. As soon as the buffer is full, the data is visualized in the user interface and stored in a global variable for later processing.
 
-# MyoBand Connection (IMU Recording)
+### IMU Integration
 To include IMU data, _MyoClient_'s function _SampleOrientation_ is integrated in the _MyoBandSession_ class. The output of the function consists of the orientation in quaternions as well as 3-dimensional linear and rotational acceleration, which results in a total of 10 data points per sample. Since IMU samples are less frequent, a separate buffer with a reduced length is implemented. With an EMG buffer length of 10 and four times smaller sampling frequency than IMU, the corresponding IMU buffer varies between 2 and 3, depending on the initial time shift. Rather than mapping the individual IMU values to the EMG samples using timestamps and interpolation, the provided IMU buffer is averaged and mapped to the sampling window. This reduces the IMU data rate to 20 Hz. 
 
 In view of the exclusive usage of orientation data  this sampling rate reduction was accepted. No further filter was applied, as the averaging already smoothened signals in between the samples.
