@@ -1,10 +1,15 @@
 # Multi-modal Adaptive Learner for Hand Motion Classification
 
-Paper Title:
+Paper Title: **Adaptive classification method for upper limb myoelectric pattern recognition**
 
-Journal: 
+Journal: **Sensors** (Under review)
 
-Authors: Veronika J. Spieker, Amartya Ganguly, Cristina Piazza, and Sami Haddadin
+Authors: **Veronika J. Spieker<sup>1</sup>**, **Amartya Ganguly<sup>1\*</sup>**, **Sami Haddadin<sup>1</sup>**, **and Cristina Piazza<sup>1,2</sup>** 
+
+
+1. Munich Institute of Robotics and Machine Intelligence, Technical University of Munich, 80797, Munich, Germany
+
+2. Department of Computer Science, Technical University of Munich, 85748, Garching bei München, Germany
 
 
 # Repository overview
