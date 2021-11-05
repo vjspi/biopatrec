@@ -2,7 +2,7 @@
 
 Paper Title: **An Adaptive Multi-Modal Control Strategy to Attenuate the Limb Position Effect in Myoelectric Pattern Recognition**
 
-Journal: **Sensors** (Under review)
+Journal: **Sensors** (Accepted)
 
 Authors: **Veronika Spieker<sup>1</sup>**, **Amartya Ganguly<sup>1\*</sup>**, **Sami Haddadin<sup>1</sup>**, **and Cristina Piazza<sup>1,2</sup>** 
 
