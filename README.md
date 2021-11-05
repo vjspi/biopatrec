@@ -1,10 +1,10 @@
 # Multi-modal Adaptive Learner for Hand Motion Classification
 
-Paper Title: **Adaptive classification method for upper limb myoelectric pattern recognition**
+Paper Title: **An Adaptive Multi-Modal Control Strategy to Attenuate the Limb Position Effect in Myoelectric Pattern Recognition**
 
 Journal: **Sensors** (Under review)
 
-Authors: **Veronika J. Spieker<sup>1</sup>**, **Amartya Ganguly<sup>1\*</sup>**, **Sami Haddadin<sup>1</sup>**, **and Cristina Piazza<sup>1,2</sup>** 
+Authors: **Veronika Spieker<sup>1</sup>**, **Amartya Ganguly<sup>1\*</sup>**, **Sami Haddadin<sup>1</sup>**, **and Cristina Piazza<sup>1,2</sup>** 
 
 
 
