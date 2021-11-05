@@ -1,4 +1,4 @@
-# Multi-modal Adaptive Learner for Hand Motion Classification
+# Adaptive Multi-modal Learner for Hand Motion Classification
 
 Paper Title: **An Adaptive Multi-Modal Control Strategy to Attenuate the Limb Position Effect in Myoelectric Pattern Recognition**
 
